@@ -54,3 +54,4 @@ docs/_build/
 
 #labyrinth logs:
 logs/
+.settings/
