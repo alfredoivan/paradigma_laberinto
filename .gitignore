@@ -58,4 +58,6 @@ logs/
 labyrinth_log_viewer/.externalToolBuilders/
 labyrinth_log_viewer/src/.classpath
 labyrinth_log_viewer/src/labyrinth_log/.gitignore
-
+labyrinth_par/.settings/org.eclipse.core.resources.prefs
+labyrinth_par/.settings/
+labyrinth_par/.settings/org.eclipse.core.resources.prefs/
