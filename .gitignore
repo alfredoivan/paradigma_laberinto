@@ -56,4 +56,6 @@ docs/_build/
 logs/
 .settings/
 labyrinth_log_viewer/.externalToolBuilders/
+labyrinth_log_viewer/src/.classpath
+labyrinth_log_viewer/src/labyrinth_log/.gitignore
 
