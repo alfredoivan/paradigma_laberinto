@@ -27,6 +27,6 @@ public class PointTime extends Point{
     }
     
     public String toString(){
-        return "labyrinth_log.PointTime[x="+x+",y="+y+",z="+time+"]";
+        return "labyrinth_log.PointTime[x="+x+",y="+y+",time="+time+"ms]";
     }
 }

@@ -34,6 +34,9 @@ public class FrameMain extends JFrame implements ChangeListener {
     JLabel lblInfo_Duration;
     JLabel lblInfo_Status;
     JLabel lblInstantInfo;
+    
+    JMenu menuRecentFiles;
+    ArrayList<String> paths = new ArrayList<String>();
 
     ArrayList<Trial> trialArray = new ArrayList<Trial>();
     int currentTrialIndex = 0;
@@ -87,14 +90,14 @@ public class FrameMain extends JFrame implements ChangeListener {
             }
         });
 
-        JButton btnUpdate = new JButton("Update");
-        btnUpdate.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                System.out.println("Updating...");
-                updateFrame();
-            }} );
+        //        JButton btnUpdate = new JButton("Update");
+        //        btnUpdate.addActionListener(new ActionListener() {
+        //
+        //            @Override
+        //            public void actionPerformed(ActionEvent arg0) {
+        //                System.out.println("Updating...");
+        //                updateFrame();
+        //            }} );
 
         JPanel pnlAll = new JPanel();
         pnlAll.setLayout(new BorderLayout());
@@ -107,6 +110,7 @@ public class FrameMain extends JFrame implements ChangeListener {
         
         JMenuBar menuBar;
         JMenu menu;
+        menuRecentFiles = new JMenu("Recent Files");
         JMenuItem menuItem;
         
         menuBar = new JMenuBar();
@@ -115,6 +119,9 @@ public class FrameMain extends JFrame implements ChangeListener {
         menu.getAccessibleContext().setAccessibleDescription(
                 "The only menu in this program that has menu items");
         menuBar.add(menu);
+        
+        menu.add(menuRecentFiles);
+        
         menuItem = new JMenuItem("Exit",
                 KeyEvent.VK_T);
         menuItem.addActionListener(new ActionListener(){
@@ -129,6 +136,8 @@ public class FrameMain extends JFrame implements ChangeListener {
         });
         menu.add(menuItem);
         
+
+        
         this.setJMenuBar(menuBar);
         
         
@@ -137,10 +146,11 @@ public class FrameMain extends JFrame implements ChangeListener {
         lblInstantInfo.setHorizontalAlignment(SwingConstants.CENTER);
         JPanel southLabels = new JPanel(new BorderLayout());
         JLabel lblBlankSpace = new JLabel("     ");
-        southLabels.add(lblInstantInfo, BorderLayout.CENTER);
+        //southLabels.add(lblInstantInfo, BorderLayout.CENTER);
         southLabels.add(lblBlankSpace, BorderLayout.PAGE_END);
         
         lblSouthInfo = new JLabel("No file loaded.");
+        lblSouthInfo.setFont(lblSouthInfo.getFont().deriveFont(10.0f));
         
         //southLabels.add(lblSouthInfo, BorderLayout.LINE_START);
         
@@ -159,7 +169,12 @@ public class FrameMain extends JFrame implements ChangeListener {
 
         timeSlider = new JSlider(JSlider.HORIZONTAL, 0, SLIDER_DIVISION, 0);
         timeSlider.addChangeListener(this);
-
+        
+        JPanel timeSliderPluslblInfo = new JPanel( new BorderLayout() );
+        timeSliderPluslblInfo.add(lblInstantInfo, BorderLayout.PAGE_END);
+        timeSliderPluslblInfo.add(timeSlider, BorderLayout.PAGE_START);
+        
+        
         // listModel.addElement("Trial 0");
         // listModel.addElement("Trial 1");
         // listModel.addElement("Trial 2");
@@ -197,7 +212,7 @@ public class FrameMain extends JFrame implements ChangeListener {
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setViewportView(jListTrials);
         pnlInterButton.add(scrollPane, BorderLayout.CENTER);
-        pnlInterButton.add(btnUpdate, BorderLayout.SOUTH);
+        //pnlInterButton.add(btnUpdate, BorderLayout.SOUTH);
 
         JPanel pnlSuperInfo = new JPanel();
         pnlSuperInfo.setLayout(new BorderLayout());
@@ -227,7 +242,7 @@ public class FrameMain extends JFrame implements ChangeListener {
         pnlSuperInfo.add(pnlInfo, BorderLayout.SOUTH);
         pnlButton.add(pnlSuperInfo);
 
-        pnlCanvas.add(timeSlider, BorderLayout.SOUTH);
+        pnlCanvas.add(timeSliderPluslblInfo, BorderLayout.SOUTH);
 
         pnlAll.add(pnlCanvas, BorderLayout.CENTER);
         pnlAll.add(pnlButton, BorderLayout.LINE_START);
@@ -312,7 +327,12 @@ public class FrameMain extends JFrame implements ChangeListener {
             }
             
             canvas.repaint();
+            
             lblSouthInfo.setText("File opened: " +path);
+            addRecentFile(path);
+            jListTrials.setSelectedIndex(0);
+            updateFrame();
+            
             // jListTrials = new JList(listModel);
         }
     }
@@ -342,8 +362,8 @@ public class FrameMain extends JFrame implements ChangeListener {
 
 
         lblInfo.setText("Trial info: " + currentTrialIndex );
-        lblInfo_Start.setText("Start: " + currentTrialStart );
-        lblInfo_End.setText("End: " + currentTrialEnd );
+        lblInfo_Start.setText("Start: " + currentTrialStart +" ms");
+        lblInfo_End.setText("End: " + currentTrialEnd +" ms");
         if (currentTrialStatus == 1){
             lblInfo_Status.setText("Status: " + currentTrialStatus + " - Fail           " );
         }
@@ -354,7 +374,7 @@ public class FrameMain extends JFrame implements ChangeListener {
             lblInfo_Status.setText("Status: " + currentTrialStatus);
         }
         //lblInfo_Status.setText("Status: " + currentTrialStatus );
-        lblInfo_Duration.setText("Duration: " + (currentTrialEnd - currentTrialStart) );
+        lblInfo_Duration.setText("Duration: " + (currentTrialEnd - currentTrialStart)  +" ms");
     }
 
     public void print(String text){
@@ -395,12 +415,45 @@ public class FrameMain extends JFrame implements ChangeListener {
                 .getTime());
     }
 
+    
+    @SuppressWarnings("static-access")
     public void infoBox(String infoMessage)
     {
         fadePopUp pop = new fadePopUp(infoMessage);
-        fadePopUp.main(null);
+        pop.main(null); 
     }
     
+    public void addRecentFile(String path){
+        //adds file to menu list of recent files. If file already exists in the list, put it on top..
+
+        for (int i = 0; i < paths.size(); i++){
+            if (paths.get(i).equals(path) ){
+                paths.remove(i);
+            }
+        }
+        
+        paths.add(path);
+        menuRecentFiles.removeAll();
+        
+        
+        for (int i = 0; i < paths.size(); i++){
+            final JMenuItem menuItem = new JMenuItem( paths.get(i) ,
+                    KeyEvent.VK_T);
+            menuItem.addActionListener(new ActionListener(){
+                @Override
+                public void actionPerformed(ActionEvent arg0) {
+                    // TODO Auto-generated method stub
+                    try{
+                        openFile(menuItem.getText());
+                    }
+                    catch(Exception e){ }
+                    
+                }
+                
+            });
+            menuRecentFiles.add(menuItem);
+        }
+    }
     
     public void exitAll(){
         System.exit(0);
