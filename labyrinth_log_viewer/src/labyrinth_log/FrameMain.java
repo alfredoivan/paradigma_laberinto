@@ -117,10 +117,22 @@ public class FrameMain extends JFrame implements ChangeListener {
         menu = new JMenu("Labyrinth Log");
         menu.setMnemonic(KeyEvent.VK_A);
         menu.getAccessibleContext().setAccessibleDescription(
-                "The only menu in this program that has menu items");
+                "Main Labyrinth log menu.");
         menuBar.add(menu);
         
         menu.add(menuRecentFiles);
+        
+        
+        menuItem = new JMenuItem("Binary (stats)",
+                KeyEvent.VK_B);
+        menuItem.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                launchBinaryWindow();
+            }
+            
+        });
+        menu.add(menuItem);
         
         menuItem = new JMenuItem("Exit",
                 KeyEvent.VK_T);
@@ -275,13 +287,13 @@ public class FrameMain extends JFrame implements ChangeListener {
                         temp.setStatus(1);
                     }else{
                         temp.setStatus(2);
-                        //we inform position of winning. Useful if hexag to determine winning location.
+                        //we inform position of win. Useful if hexag to determine winning status in each trial and to put winning loc.
                         
                         canvas.winningPoint.setLocation(temp.getPoint(-1).iGetX(), temp.getPoint(-1).iGetY());
-                        System.out.println(".........----");
-                        System.out.println(temp.getPoint(-1).iGetX());
-                        System.out.println(temp.getPoint(-1).iGetY());
-                        System.out.println(".........----");
+                        //System.out.println(".........----");
+                        //System.out.println(temp.getPoint(-1).iGetX());
+                        //System.out.println(temp.getPoint(-1).iGetY());
+                        //System.out.println(".........----");
                         winingLocationFound = true;
                         
                         
@@ -411,8 +423,10 @@ public class FrameMain extends JFrame implements ChangeListener {
         canvas.updateData(
                 (int) trialArray.get(currentTrialIndex).getPoint(tmpin).getX(),
                 (int) trialArray.get(currentTrialIndex).getPoint(tmpin).getY(),
-                (int) trialArray.get(currentTrialIndex).getPoint(tmpin)
-                .getTime());
+                (int) trialArray.get(currentTrialIndex).getPoint(tmpin).getTime(),
+                trialArray.get(currentTrialIndex).getPoint(tmpin).getDirX(),
+                trialArray.get(currentTrialIndex).getPoint(tmpin).getDirY()
+                );
     }
 
     
@@ -453,6 +467,13 @@ public class FrameMain extends JFrame implements ChangeListener {
             });
             menuRecentFiles.add(menuItem);
         }
+    }
+    
+    public void launchBinaryWindow(){
+        JFrame frBinary = new JFrame("Binary (stats.)");
+        frBinary.setVisible(true);
+        CanvasStats canvasStats = new CanvasStats();
+        frBinary.add(canvasStats);
     }
     
     public void exitAll(){

@@ -3,8 +3,10 @@ package labyrinth_log;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Polygon;
+import java.awt.geom.AffineTransform;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -15,6 +17,8 @@ public class CanvasGraph extends JPanel {
     int subjectx=0;
     int subjecty=0;
     int subjectz =0;
+    double dirx;
+    double diry;
     int canvasType = 2; //0: T-Maze ; 1:Hexag. ; 2:no-type
     Point winningPoint = new Point (-50,-50);
     
@@ -38,17 +42,36 @@ public class CanvasGraph extends JPanel {
         g.fillRect(width / 4 ,  0 , width, height / 4 - height / 15);
         g.setColor(Color.BLUE);
         g.fillOval(xx * width / 71 - 5, height - (yy * height / 16) - 5, 10, 10);
+        
+        
+        int xxpos = xx * width / 71 - 5;
+        int yypos = height - (yy * height / 16) - 5;
+        
+        g.setColor(Color.DARK_GRAY);
+        //arrow
+        g.drawLine(xxpos + 5, yypos + 5, xxpos + 5 + (int)(dirx*20) , yypos + 5 -(int)(diry*20) );
+        drawArrow(g, xxpos + 5, yypos + 5, xxpos + 5 + (int)(dirx*20) , yypos + 5 -(int)(diry*20) );
     }
     else if (canvasType == 1){
         //hexag. type.
         
         g.setColor(Color.GREEN);
+        int xxpos = xx * width / 44 - 45;
+        int yypos = height - (yy * height / 44) - 5;
+        
         g.fillOval(winningPoint.x * width / 44 - 45 - 1, height - ( (winningPoint.y-3) * height / 44) - 5 - 1, 12, 12);
         g.setColor(Color.BLUE);
-        g.fillOval(xx * width / 44 - 45, height - (yy * height / 44) - 5, 10, 10);
+        g.fillOval(xxpos, yypos, 10, 10);
         int xPoly[] = {15 * width / 44 - 15   , 31 * width / 44 - 15  , 41 * width / 44 - 15    , 31 * width / 44 - 15  , 15 * width / 44 - 15,  5 * width / 44 - 15   };
         int yPoly[] = {4 * height / 44 - 5    , 4 * height / 44 - 5   , 22 * height / 44 - 5   , 40 * height / 44 - 5, 40 * height / 44 - 5   , 22 * height / 44 - 5  };
-
+        
+        
+        g.setColor(Color.DARK_GRAY);
+        //arrow
+        g.drawLine(xxpos + 5, yypos + 5, xxpos + 5 + (int)(dirx*20) , yypos + 5 -(int)(diry*20) );
+        drawArrow(g, xxpos + 5, yypos + 5, xxpos + 5 + (int)(dirx*20) , yypos + 5 -(int)(diry*20) );
+        
+        g.setColor(Color.BLACK);
         Polygon poly = new Polygon(xPoly, yPoly, xPoly.length);
         g.drawPolygon(poly);
         
@@ -77,6 +100,24 @@ public class CanvasGraph extends JPanel {
     frame.setVisible(true);
   }
   
+  
+  void drawArrow(Graphics g1, int x1, int y1, int x2, int y2) {
+      Graphics2D g = (Graphics2D) g1.create();
+      int ARR_SIZE = 8;
+      
+      double dx = x2 - x1, dy = y2 - y1;
+      double angle = Math.atan2(dy, dx);
+      int len = (int) Math.sqrt(dx*dx + dy*dy);
+      AffineTransform at = AffineTransform.getTranslateInstance(x1, y1);
+      at.concatenate(AffineTransform.getRotateInstance(angle));
+      g.transform(at);
+
+      // Draw horizontal arrow starting in (0, 0)
+      g.drawLine(0, 0, len, 0);
+      g.fillPolygon(new int[] {len, len-ARR_SIZE, len-ARR_SIZE, len},
+                    new int[] {0, -ARR_SIZE, ARR_SIZE, 0}, 4);
+  }
+  
   public void setCanvasType(int nwtype){
       canvasType = nwtype;
       if (canvasType == 0){
@@ -87,10 +128,12 @@ public class CanvasGraph extends JPanel {
       }
   }
   
-  public void updateData(int x, int y, int z){
+  public void updateData(int x, int y, int z, double drx, double dry){
       subjectx = x;
       subjecty = y;
       subjectz = z;
+      dirx = drx;
+      diry = dry;
       this.repaint();
   }
   

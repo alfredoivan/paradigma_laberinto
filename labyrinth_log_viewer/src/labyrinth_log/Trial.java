@@ -14,7 +14,7 @@ public class Trial {
     int end = 0;
     
     public Trial(){
-        System.out.println("New Trial created.");
+        //System.out.println("New Trial created.");
         status = 0;
         start = 0;
         duration = 0;
@@ -48,33 +48,60 @@ public class Trial {
     }
 
     public void addPoint(String pnt){
+        //parse a x y time point from a string, adds it to list of points.
         if (pnt == null)return;
+        if (pnt.equals("")) return;
         stringLines.add(pnt);
-        int a = pnt.indexOf(",");
-        String tempstr = pnt.substring( a + 1 );
-        String subtemp = tempstr.substring(0, tempstr.indexOf(","));
-        //System.out.println("subtemp: "+subtemp);
-        //System.out.println("X : "+pnt.substring(a, tempstr.indexOf(",") ) ) ;
-        int posx = Integer.parseInt( subtemp.substring(0, subtemp.indexOf(".")) ) ;
         
-        //System.out.println("posx: "+posx);
-        
-        String tempstr2 = tempstr.substring(tempstr.indexOf(",")+1);
-        String subtemp2 = tempstr2.substring(0, tempstr2.indexOf(","));
-        //System.out.println("tempstr2: "+tempstr2);
-        //System.out.println("subtemp2: "+subtemp2);
-        
-        int posy = Integer.parseInt( subtemp2.substring(0, subtemp2.indexOf(".")) ) ;
+        String[] parts = pnt.split(",", 10);
+        String parts1 = correctMultiplePoints( parts[1] );
+        String parts2 = correctMultiplePoints( parts[2] );
+        String parts3 = correctMultiplePoints( parts[3] );
+        String parts4 = correctMultiplePoints( parts[4] );
         
         
-        //System.out.println("posy: "+posy);
+        int posx = (int)Double.parseDouble( parts1 );
         
-        String tempfl = pnt.substring( 0, a );
-        //System.out.println("tempfl: "+ tempfl);
+        int posy = (int)Double.parseDouble( parts2 );
         
-        int z = Integer.parseInt(tempfl); //this being the time.
+        double dirx = Double.parseDouble( parts3 ) ;
+        double diry = Double.parseDouble( parts4 ) ;
         
-        points.add(new PointTime(posx,posy, z));
+        
+        
+        int z = Integer.parseInt(parts[0]); //this being the time.
+        
+        points.add(new PointTime(posx,posy, z, dirx, diry));
+    }
+    
+    public String correctMultiplePoints(String input){
+        //input has multiple points. should return a string from 0 to the 2nd point
+        String output = input;
+        int count = output.length() - output.replace(".", "").length();
+        //System.out.println("Occurrences of dots: "+count);
+        if (count == 1){
+            //only one dot, so it is ok like this
+            return output;
+        }
+        if (count >1){
+            //more than one dot, remove everything from the second one.
+            int tempcount = 0;
+            for (int i=0; i< input.length(); i++){
+                if (input.charAt(i) == '.'){
+                    tempcount++;
+                }
+                
+                if (tempcount == 2){
+                    //second occurrence, remove everything from 0 to here.
+                    output = input.substring(0, i);
+                    return output;
+                }
+            }
+            
+        }
+        
+        return output;
+        
     }
     
     public void printAllPoints(){
