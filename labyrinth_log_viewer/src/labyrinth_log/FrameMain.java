@@ -18,6 +18,8 @@ public class FrameMain extends JFrame implements ChangeListener {
      * 
      */
     private static final long serialVersionUID = 1L;
+    
+    static int mouseCounter = 0;
     private Closer Handler;
     CanvasGraph canvas = new CanvasGraph();
     JSlider timeSlider;
@@ -25,6 +27,8 @@ public class FrameMain extends JFrame implements ChangeListener {
 
     DefaultListModel<String> listModel = new DefaultListModel<String>();
     JLabel lblInfo;
+    JLabel lblSouthInfo;
+    JLabel lblInfoBlank;
     JLabel lblInfo_Start;
     JLabel lblInfo_End;
     JLabel lblInfo_Duration;
@@ -49,6 +53,8 @@ public class FrameMain extends JFrame implements ChangeListener {
         setSize(640, 480);
         addWindowListener(Handler);
         addComponents();
+        counterThread cnt = new counterThread();
+        cnt.start();
         setVisible(true);
     }
 
@@ -98,14 +104,51 @@ public class FrameMain extends JFrame implements ChangeListener {
 
         JPanel pnlButton = new JPanel();
         pnlButton.setLayout(new GridLayout(0, 1));
-
-        JLabel lblTitle = new JLabel("Labyrinth Log");
+        
+        JMenuBar menuBar;
+        JMenu menu;
+        JMenuItem menuItem;
+        
+        menuBar = new JMenuBar();
+        menu = new JMenu("Labyrinth Log");
+        menu.setMnemonic(KeyEvent.VK_A);
+        menu.getAccessibleContext().setAccessibleDescription(
+                "The only menu in this program that has menu items");
+        menuBar.add(menu);
+        menuItem = new JMenuItem("Exit",
+                KeyEvent.VK_T);
+        menuItem.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                // TODO Auto-generated method stub
+                System.out.println("Exit from menu.");
+                exitAll();
+                
+            }
+            
+        });
+        menu.add(menuItem);
+        
+        this.setJMenuBar(menuBar);
+        
+        
+        //JLabel lblTitle = new JLabel("Labyrinth Log");
         lblInstantInfo = new JLabel("----------");
+        lblInstantInfo.setHorizontalAlignment(SwingConstants.CENTER);
+        JPanel southLabels = new JPanel(new BorderLayout());
+        JLabel lblBlankSpace = new JLabel("     ");
+        southLabels.add(lblInstantInfo, BorderLayout.CENTER);
+        southLabels.add(lblBlankSpace, BorderLayout.PAGE_END);
+        
+        lblSouthInfo = new JLabel("No file loaded.");
+        
+        //southLabels.add(lblSouthInfo, BorderLayout.LINE_START);
+        
+        //pnlAll.add(lblTitle, BorderLayout.NORTH);
 
-        pnlAll.add(lblTitle, BorderLayout.NORTH);
-
-        JPanel pnlII = new JPanel();
-        pnlII.add(lblInstantInfo, BorderLayout.LINE_END);
+        JPanel pnlII = new JPanel(new BorderLayout() );
+        pnlII.add(southLabels, BorderLayout.CENTER);
+        pnlII.add(lblSouthInfo, BorderLayout.PAGE_END);
         pnlAll.add(pnlII, BorderLayout.SOUTH);
 
         JPanel pnlInterButton = new JPanel();
@@ -123,6 +166,32 @@ public class FrameMain extends JFrame implements ChangeListener {
         listModel.addElement("-----------------");
         jListTrials = new JList<String>(listModel);
         jListTrials.setVisibleRowCount(5);
+        jListTrials.addMouseListener(new MouseListener(){
+
+            @Override
+            public void mouseClicked(MouseEvent arg0) {
+                mouseCounter += 5;
+                if (mouseCounter > 5){
+                    //System.out.println("Mouse doubleclicked..");
+                    mouseCounter = 0;
+                    updateFrame();
+                }
+                
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent arg0) { }
+
+            @Override
+            public void mouseExited(MouseEvent arg0) { }
+
+            @Override
+            public void mousePressed(MouseEvent arg0) { }
+
+            @Override
+            public void mouseReleased(MouseEvent arg0) { }
+            
+        });
 
         // jListTrials.setPreferredSize(new Dimension(10,20) );
         JScrollPane scrollPane = new JScrollPane();
@@ -135,7 +204,8 @@ public class FrameMain extends JFrame implements ChangeListener {
 
         JPanel pnlInfo = new JPanel();
         pnlInfo.setLayout(new GridLayout(0, 1, 5, 2));
-
+        
+        lblInfoBlank = new JLabel("                                       ");
         lblInfo = new JLabel("Trial info:");
         lblInfo_Start = new JLabel("Start:");
         lblInfo_End = new JLabel("End:");
@@ -144,13 +214,15 @@ public class FrameMain extends JFrame implements ChangeListener {
 
         pnlButton.add(pnlInterButton);
 
+        pnlInfo.add(lblInfoBlank);
         pnlInfo.add(lblInfo);
         pnlInfo.add(lblInfo_Start);
         pnlInfo.add(lblInfo_End);
         pnlInfo.add(lblInfo_Duration);
         pnlInfo.add(lblInfo_Status);
 
-
+        //not working properly.
+        pnlInfo.setMinimumSize( new Dimension (lblInfo_Duration.getText().length() *10 , lblInfo_Duration.getText().length() *10 ) );
 
         pnlSuperInfo.add(pnlInfo, BorderLayout.SOUTH);
         pnlButton.add(pnlSuperInfo);
@@ -240,6 +312,7 @@ public class FrameMain extends JFrame implements ChangeListener {
             }
             
             canvas.repaint();
+            lblSouthInfo.setText("File opened: " +path);
             // jListTrials = new JList(listModel);
         }
     }
@@ -258,8 +331,7 @@ public class FrameMain extends JFrame implements ChangeListener {
 
         timeSlider.setValue(0);
         _updateFr();
-
-        canvas.repaint();
+        setSliderPointTime(0);
     }
 
     private void _updateFr(){
@@ -273,10 +345,10 @@ public class FrameMain extends JFrame implements ChangeListener {
         lblInfo_Start.setText("Start: " + currentTrialStart );
         lblInfo_End.setText("End: " + currentTrialEnd );
         if (currentTrialStatus == 1){
-            lblInfo_Status.setText("Status: " + currentTrialStatus + " - Fail" );
+            lblInfo_Status.setText("Status: " + currentTrialStatus + " - Fail           " );
         }
         else if (currentTrialStatus == 2){
-            lblInfo_Status.setText("Status: " + currentTrialStatus + " - Success" );
+            lblInfo_Status.setText("Status: " + currentTrialStatus + " - Success " );
         }
         else{
             lblInfo_Status.setText("Status: " + currentTrialStatus);
@@ -308,6 +380,10 @@ public class FrameMain extends JFrame implements ChangeListener {
                 .size() / (SLIDER_DIVISION * 1.0) * a) - 1;
         if (tmpin < 0)
             tmpin = 0;
+        setSliderPointTime(tmpin);
+    }
+    
+    public void setSliderPointTime(int tmpin){
         System.out.println(trialArray.get(currentTrialIndex).getPoint(tmpin)
                 .toString());
         print (trialArray.get(currentTrialIndex).getPoint(tmpin)
@@ -325,9 +401,31 @@ public class FrameMain extends JFrame implements ChangeListener {
         fadePopUp.main(null);
     }
     
+    
+    public void exitAll(){
+        System.exit(0);
+    }
 }
 
 
+class counterThread extends Thread {
+    boolean runningc = true; 
+    public void run(){
+        while(runningc){
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                //e.printStackTrace();
+            }
+            //System.out.println(FrameMain.mouseCounter);
+            if (FrameMain.mouseCounter > 0){
+                FrameMain.mouseCounter--;
+            }
+            }
+
+        }
+       
+}
 
 class Closer extends WindowAdapter {
     public void windowClosing(WindowEvent event) {

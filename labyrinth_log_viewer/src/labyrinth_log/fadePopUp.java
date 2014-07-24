@@ -80,11 +80,11 @@ class fadeOutThread extends Thread {
     
     public void run(){
         while(running){
-            System.out.println("MyThread running");
+            //System.out.println("MyThread running");
             counter++;
             if (counter >= 45){
                 running = false;
-                System.out.println("MyThread FALSE");
+                //System.out.println("MyThread FALSE");
                 //this.interrupt();
                 runningJDialog.disposeAll();
             }
