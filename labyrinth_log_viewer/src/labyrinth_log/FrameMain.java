@@ -24,6 +24,7 @@ public class FrameMain extends JFrame implements ChangeListener {
     CanvasGraph canvas = new CanvasGraph();
     JSlider timeSlider;
     JList<String> jListTrials;
+    
 
     DefaultListModel<String> listModel = new DefaultListModel<String>();
     JLabel lblInfo;
@@ -133,6 +134,22 @@ public class FrameMain extends JFrame implements ChangeListener {
             
         });
         menu.add(menuItem);
+        
+        final JCheckBoxMenuItem checkmenu = new JCheckBoxMenuItem("Show subject's direction (arrow)?");
+        checkmenu.setState(true);
+        checkmenu.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                if (checkmenu.getState() == true){
+                    canvas.showArrow = true;
+                }else{
+                    canvas.showArrow = false;
+                }
+                canvas.updateData();
+            }
+            
+        });
+        menu.add(checkmenu);
         
         menuItem = new JMenuItem("Exit",
                 KeyEvent.VK_T);
@@ -391,7 +408,6 @@ public class FrameMain extends JFrame implements ChangeListener {
 
     public void print(String text){
         lblInstantInfo.setText(text);
-
     }
 
     @Override
@@ -473,7 +489,11 @@ public class FrameMain extends JFrame implements ChangeListener {
         JFrame frBinary = new JFrame("Binary (stats.)");
         frBinary.setVisible(true);
         CanvasStats canvasStats = new CanvasStats();
+        canvasStats.setPrefSize();
+        int data[] = {5,0,0,0,0,5,5,5,5,5,0,5};
         frBinary.add(canvasStats);
+        canvasStats.setData(data);
+        frBinary.pack();
     }
     
     public void exitAll(){

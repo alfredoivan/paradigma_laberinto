@@ -17,6 +17,8 @@ public class CanvasGraph extends JPanel {
     int subjectx=0;
     int subjecty=0;
     int subjectz =0;
+    boolean showArrow = true;
+    
     double dirx;
     double diry;
     int canvasType = 2; //0: T-Maze ; 1:Hexag. ; 2:no-type
@@ -47,10 +49,14 @@ public class CanvasGraph extends JPanel {
         int xxpos = xx * width / 71 - 5;
         int yypos = height - (yy * height / 16) - 5;
         
-        g.setColor(Color.DARK_GRAY);
-        //arrow
-        g.drawLine(xxpos + 5, yypos + 5, xxpos + 5 + (int)(dirx*20) , yypos + 5 -(int)(diry*20) );
-        drawArrow(g, xxpos + 5, yypos + 5, xxpos + 5 + (int)(dirx*20) , yypos + 5 -(int)(diry*20) );
+        
+        if (showArrow){
+            g.setColor(Color.DARK_GRAY);
+            //arrow
+            g.drawLine(xxpos + 5, yypos + 5, xxpos + 5 + (int)(dirx*20) , yypos + 5 -(int)(diry*20) );
+            drawArrow(g, xxpos + 5, yypos + 5, xxpos + 5 + (int)(dirx*20) , yypos + 5 -(int)(diry*20) );
+        }
+
     }
     else if (canvasType == 1){
         //hexag. type.
@@ -65,11 +71,13 @@ public class CanvasGraph extends JPanel {
         int xPoly[] = {15 * width / 44 - 15   , 31 * width / 44 - 15  , 41 * width / 44 - 15    , 31 * width / 44 - 15  , 15 * width / 44 - 15,  5 * width / 44 - 15   };
         int yPoly[] = {4 * height / 44 - 5    , 4 * height / 44 - 5   , 22 * height / 44 - 5   , 40 * height / 44 - 5, 40 * height / 44 - 5   , 22 * height / 44 - 5  };
         
-        
-        g.setColor(Color.DARK_GRAY);
-        //arrow
-        g.drawLine(xxpos + 5, yypos + 5, xxpos + 5 + (int)(dirx*20) , yypos + 5 -(int)(diry*20) );
-        drawArrow(g, xxpos + 5, yypos + 5, xxpos + 5 + (int)(dirx*20) , yypos + 5 -(int)(diry*20) );
+        if (showArrow){
+            g.setColor(Color.DARK_GRAY);
+            //arrow
+            g.drawLine(xxpos + 5, yypos + 5, xxpos + 5 + (int)(dirx*20) , yypos + 5 -(int)(diry*20) );
+            drawArrow(g, xxpos + 5, yypos + 5, xxpos + 5 + (int)(dirx*20) , yypos + 5 -(int)(diry*20) );
+        }
+
         
         g.setColor(Color.BLACK);
         Polygon poly = new Polygon(xPoly, yPoly, xPoly.length);
@@ -126,6 +134,10 @@ public class CanvasGraph extends JPanel {
       else if (canvasType == 1){
           System.out.println("Canvas type changed to Hexag");
       }
+  }
+  
+  public void updateData(){
+      this.repaint();
   }
   
   public void updateData(int x, int y, int z, double drx, double dry){
