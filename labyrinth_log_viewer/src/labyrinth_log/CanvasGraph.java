@@ -7,7 +7,11 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -108,6 +112,24 @@ public class CanvasGraph extends JPanel {
     frame.setVisible(true);
   }
   
+  void savePanel(String filen) {
+      if (filen == null)
+          return;
+      int w = this.getWidth();
+      int h = this.getHeight();
+      BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+      Graphics2D g2 = bi.createGraphics();
+      this.paint(g2);
+      g2.dispose();
+      String tipo = "png";
+      try {
+          ImageIO.write(bi, tipo, new File(filen + "." + tipo));
+          System.out.println("Image: " + filen + "." + tipo + " saved");
+      } catch (IOException ioe) {
+          System.out.println("Saving file error: " + ioe.getMessage());
+      }
+      this.updateUI();
+  }
   
   void drawArrow(Graphics g1, int x1, int y1, int x2, int y2) {
       Graphics2D g = (Graphics2D) g1.create();

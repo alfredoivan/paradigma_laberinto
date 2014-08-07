@@ -16,6 +16,8 @@ class CanvasStats extends JPanel {
     int arrayData[] = new int[0];
     int maxValue = 0;
     boolean isMaxTrialsToTen = false;
+    Dimension prefferredDimension = new Dimension(10 + arrayData.length * 62 + 50,
+            350);
 
     private static final long serialVersionUID = 1L;
 
@@ -29,10 +31,15 @@ class CanvasStats extends JPanel {
     }
 
     public void setPrefSize() {
-        this.setPreferredSize(new Dimension(10 + arrayData.length * 62 + 50,
-                350));
+        recalculatePrefferredDimension();
+        this.setPreferredSize(prefferredDimension);
         // System.out.println(arrayData.length);
         this.updateUI();
+    }
+    
+    public void recalculatePrefferredDimension(){
+        prefferredDimension = new Dimension(10 + arrayData.length * 62 + 50,
+                350);
     }
     
     
@@ -58,13 +65,14 @@ class CanvasStats extends JPanel {
         // g.drawString("Custom Panel: Here goes the graph needed to visualize",10,20);
         if (arrayData != null) {
             for (int i = 0; i < arrayData.length; i++) {
-                int unitHeightValue = 0;
-                if (maxValue != 0)
-                    unitHeightValue = g.getClipBounds().height / maxValue;
+                int barHeight = 0;
                 
-                g.fillRect(10 + i * 62, g.getClipBounds().height - (arrayData[i] + 1)
-                        * unitHeightValue - 5, 40, (arrayData[i] + 1)
-                        * unitHeightValue - 35);
+                if (maxValue != 0)
+                    barHeight = (int) (( (g.getClipBounds().height - 5) * (arrayData[i] * 1.0 / maxValue)  ) - 40);
+                
+                if (arrayData[i] != 0){
+                    g.fillRect(10 + i * 62, g.getClipBounds().height - barHeight - 40, 40, barHeight);
+                }
                 g.drawString("[" + i + "] _ " + arrayData[i], 10 + i * 62,
                         super.getHeight() - 20);
             }
@@ -82,20 +90,46 @@ class CanvasStats extends JPanel {
                     maxValue = arrayData[i];
             }
         }else{
-            maxValue = 11;
+            maxValue = 1;
         }
 
         // System.out.println(maxValue);
+        this.setPrefSize();
+    }
+    
+    
+    public void setData(Integer[] data){
+        Integer[] arrayIntegers;
+        arrayIntegers = data;
+        
+        if (!isMaxTrialsToTen){
+            for (int i = 0; i < arrayIntegers.length; i++) {
+                if (arrayIntegers[i].intValue() > maxValue)
+                    maxValue = arrayIntegers[i].intValue();
+            }
+        }else{
+            maxValue = 11;
+        }
+        
+        int arrayData[] = new int[arrayIntegers.length];
+        
+        for (int i = 0; i < arrayData.length; i++) {
+            arrayData[i] = arrayIntegers[i].intValue();
+        }
+        
+        
+        System.out.println("data set.");
         this.setPrefSize();
     }
 
     void savePanel(String filen) {
         if (filen == null)
             return;
-        setGoodSize();
-        int w = this.getWidth();
-        int h = this.getHeight();
-        BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+        //int w = this.getWidth();
+        //int h = this.getHeight();
+        recalculatePrefferredDimension();
+        this.setSize(prefferredDimension);
+        BufferedImage bi = new BufferedImage(prefferredDimension.width, prefferredDimension.height, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2 = bi.createGraphics();
         this.paint(g2);
         g2.dispose();
@@ -106,6 +140,7 @@ class CanvasStats extends JPanel {
         } catch (IOException ioe) {
             System.out.println("Saving file error: " + ioe.getMessage());
         }
+        this.updateUI();
     }
 
     

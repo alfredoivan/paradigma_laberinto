@@ -10,6 +10,7 @@ public class fadePopUp extends JDialog {
     static fadeOutThread fadeout;
     static String message ;
     
+    
     public fadePopUp( String textMessage) {
         //super("TranslucentWindow");
         System.out.println("popup created.");
