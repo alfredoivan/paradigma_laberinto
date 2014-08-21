@@ -597,7 +597,7 @@ public class FrameMain extends JFrame implements ChangeListener {
         int[] dataset = new int[trialArray.size()];
         
         for (int i = 0; i < trialArray.size(); i++) {
-            dataset[i] = ( trialArray.get(i).getDuration() );
+            dataset[i] = (int) ( ( trialArray.get(i).getDuration() )/ 1000.0 );
         }
         
         return dataset;
