@@ -121,7 +121,9 @@ class CanvasStats extends JPanel {
         System.out.println("data set.");
         this.setPrefSize();
     }
-
+    
+    
+    
     void savePanel(String filen) {
         if (filen == null)
             return;

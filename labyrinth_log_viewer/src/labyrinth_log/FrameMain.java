@@ -535,7 +535,7 @@ public class FrameMain extends JFrame implements ChangeListener {
         if (type == 1){
             //trial duration vs trial.
             fileSuffix = "_duration";
-            frBinary.setTitle("Trial Duration in ms (stats.)");
+            frBinary.setTitle("Trial Duration in seconds (stats.)");
             canvasStats.setData(processDurationData());
         }
         
@@ -591,10 +591,13 @@ public class FrameMain extends JFrame implements ChangeListener {
     }
     
     private int[] processDurationData(){
+        //returns array of int as the dataset to be draw in a canvas.
+        //rounds data to seconds, 2 decimals
+        
         int[] dataset = new int[trialArray.size()];
         
         for (int i = 0; i < trialArray.size(); i++) {
-            dataset[i] = trialArray.get(i).getDuration();
+            dataset[i] = ( trialArray.get(i).getDuration() );
         }
         
         return dataset;
