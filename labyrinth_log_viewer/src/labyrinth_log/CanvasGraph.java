@@ -42,10 +42,10 @@ public class CanvasGraph extends JPanel {
     if (canvasType == 0){
         //TMAZE type
         
+        //boundaries
         g.setColor(Color.black);
-        //g.drawOval(0, 0, width, height);
-        g.fillRect(width / 4 , height - ( height / 4 - height / 100 )  , width, height);
-        g.fillRect(width / 4 ,  0 , width, height / 4 - height / 15);
+        g.fillRect( (width * 10) / 100 , height - ( height / 4 - height / 100 )  , width, height);
+        g.fillRect( (width * 10) / 100 ,  0 , width, height / 4 - height / 15);
         g.setColor(Color.BLUE);
         g.fillOval(xx * width / 71 - 5, height - (yy * height / 16) - 5, 10, 10);
         
@@ -105,7 +105,7 @@ public class CanvasGraph extends JPanel {
 
   }
   public static void main(String args[]) {
-    JFrame frame = new JFrame("Oval Sample");
+    JFrame frame = new JFrame("CanvasGraph");
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.add(new CanvasGraph());
     frame.setSize(300, 200);
