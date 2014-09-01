@@ -18,13 +18,14 @@ public class FrameMain extends JFrame implements ChangeListener {
      * 
      */
     private static final long serialVersionUID = 1L;
-
-    static int mouseCounter = 0;
+    final int SLIDER_DIVISION = 1000;
+    
+    static int mouseCounter = 0; //counter for double-click
     private Closer Handler;
     CanvasGraph canvas = new CanvasGraph();
     JSlider timeSlider;
     JList<String> jListTrials;
-    JPanel pnlAll = new JPanel();
+    JPanel pnlAll = new JPanel(); //panel that contains the rest of the GUI items.
 
     DefaultListModel<String> listModel = new DefaultListModel<String>();
     JLabel lblInfo;
@@ -41,17 +42,14 @@ public class FrameMain extends JFrame implements ChangeListener {
 
     ArrayList<Trial> trialArray = new ArrayList<Trial>();
     int currentTrialIndex = 0;
-
     int currentTrialStart = 0;
     int currentTrialEnd = 0;
     int currentTrialStatus = 0; // 0 unknown, 1 lose, 2 win
 
     boolean fileOpened = false; // true = at least one file has been opened
-    boolean winingLocationFound = false;
+    boolean winingLocationFound = false; //appropriate with octagon.
 
-    final int SLIDER_DIVISION = 1000;
-
-    String currentFilePath;
+    String currentFilePath; //current working path.
 
     FrameMain() {
         Handler = new Closer();
@@ -74,7 +72,6 @@ public class FrameMain extends JFrame implements ChangeListener {
                         System.out.println(files[i].getCanonicalPath() + "\n");
                         openFile(files[i].getCanonicalPath());
                         // model.addElement(files[i].getCanonicalPath());
-
                     } // end try
                     catch (java.io.IOException e) {
                     }
@@ -98,7 +95,6 @@ public class FrameMain extends JFrame implements ChangeListener {
                     System.out.println("Opening: " + file.getAbsolutePath());
                     print("Opening: " + file.getAbsolutePath());
                     try {
-
                         openFile(file.getAbsolutePath());
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
@@ -308,13 +304,13 @@ public class FrameMain extends JFrame implements ChangeListener {
     }
 
     public void openFile(String path) throws FileNotFoundException, IOException {
-        System.out.println("openFile");
+        System.out.println("openFile: " + path);
         fileOpened = true;
         winingLocationFound = false;
         trialArray.removeAll(trialArray);
-        System.out.println("trialArray cleaned.");
-
-        try (BufferedReader br = new BufferedReader(new FileReader("" + path))) {
+        //System.out.println("trialArray cleaned.");
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("" + path));
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
             Trial temp = new Trial();
@@ -322,12 +318,9 @@ public class FrameMain extends JFrame implements ChangeListener {
                 sb.append(line);
                 sb.append(System.lineSeparator());
                 line = br.readLine();
-
                 if (line == null)
                     continue;
-
                 line = line.replaceAll(";", ","); // just in case it is with ;
-
                 if (line.contains(",1,1") || line.contains(",1,2")) {
                     if (line.contains(",1,1")) {
                         temp.setStatus(1);
@@ -372,7 +365,7 @@ public class FrameMain extends JFrame implements ChangeListener {
             if ((int) trialArray.get(0).getPoint(0).getX() == 25
                     && (int) trialArray.get(0).getPoint(0).getY() == 25) {
                 // this is a hexag training type.
-                System.out.println("this is hexag type.");
+                //System.out.println("this is hexag type.");
                 canvas.setCanvasType(1);
                 if (winingLocationFound == true)
                     infoBox("Winning location drawn into a green circle on each trial.");
@@ -381,10 +374,10 @@ public class FrameMain extends JFrame implements ChangeListener {
                 }
             } else if ((int) trialArray.get(0).getPoint(0).getX() == 70
                     && (int) trialArray.get(0).getPoint(0).getY() == 11) {
-                System.out.println("this is tmaze type.");
+                //System.out.println("this is tmaze type.");
                 canvas.setCanvasType(0);
             } else {
-                System.out.println("Unknown type.");
+                //System.out.println("Unknown type.");
             }
 
             canvas.repaint();
@@ -394,7 +387,12 @@ public class FrameMain extends JFrame implements ChangeListener {
             jListTrials.setSelectedIndex(0);
             updateFrame();
             currentFilePath = path;
+            br.close();
             // jListTrials = new JList(listModel);
+        }
+        catch(Exception e){
+            System.out.println("Exception while opening file.");
+            return;
         }
     }
 
@@ -448,7 +446,7 @@ public class FrameMain extends JFrame implements ChangeListener {
     public void stateChanged(ChangeEvent arg0) {
         if (!fileOpened)
             return;
-        System.out.println(jListTrials.getSelectedIndex());
+        //System.out.println(jListTrials.getSelectedIndex());
         currentTrialIndex = jListTrials.getSelectedIndex();
         if (currentTrialIndex < 0)
             return;
@@ -456,7 +454,7 @@ public class FrameMain extends JFrame implements ChangeListener {
         _updateFr();
 
         int a = timeSlider.getValue();
-        System.out.println("Slider status changed: " + a);
+        //System.out.println("Slider status changed: " + a);
         trialArray.get(trialArray.size() / SLIDER_DIVISION * a);
 
         int tmpin = (int) ((int) trialArray.get(currentTrialIndex).points
@@ -467,8 +465,8 @@ public class FrameMain extends JFrame implements ChangeListener {
     }
 
     public void setSliderPointTime(int tmpin) {
-        System.out.println(trialArray.get(currentTrialIndex).getPoint(tmpin)
-                .toString());
+        //System.out.println(trialArray.get(currentTrialIndex).getPoint(tmpin)
+        //        .toString());
         print(trialArray.get(currentTrialIndex).getPoint(tmpin).toString());
         canvas.updateData(
                 (int) trialArray.get(currentTrialIndex).getPoint(tmpin).getX(),
@@ -549,9 +547,8 @@ public class FrameMain extends JFrame implements ChangeListener {
         menuItem_save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                
                 canvasStats.savePanel(currentFilePath + fileSuff_);
-                infoBox("Image Saved.");
+                infoBox("Image Saved: " + currentFilePath + fileSuff_ + "." +canvasStats.imageExtension );
             }
 
         });

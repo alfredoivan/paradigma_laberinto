@@ -13,7 +13,7 @@ public class fadePopUp extends JDialog {
     
     public fadePopUp( String textMessage) {
         //super("TranslucentWindow");
-        System.out.println("popup created.");
+        //System.out.println("popup created.");
         setLayout(new GridBagLayout());
 
         setSize(300,200);

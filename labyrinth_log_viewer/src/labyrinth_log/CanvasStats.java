@@ -18,7 +18,8 @@ class CanvasStats extends JPanel {
     boolean isMaxTrialsToTen = false;
     Dimension prefferredDimension = new Dimension(10 + arrayData.length * 62 + 50,
             350);
-
+    String imageExtension = "png";
+    
     private static final long serialVersionUID = 1L;
 
     public CanvasStats() {
@@ -135,10 +136,10 @@ class CanvasStats extends JPanel {
         Graphics2D g2 = bi.createGraphics();
         this.paint(g2);
         g2.dispose();
-        String tipo = "png";
+        
         try {
-            ImageIO.write(bi, tipo, new File(filen + "." + tipo));
-            System.out.println("Image: " + filen + "." + tipo + " saved");
+            ImageIO.write(bi, imageExtension, new File(filen + "." + imageExtension));
+            System.out.println("Image: " + filen + "." + imageExtension + " saved");
         } catch (IOException ioe) {
             System.out.println("Saving file error: " + ioe.getMessage());
         }
