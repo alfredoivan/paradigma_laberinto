@@ -320,6 +320,29 @@ public class FrameMain extends JFrame implements ChangeListener {
         this.add(pnlAll);
     }
 
+    public void setMazeType(int type){
+        if (type == 0){
+            // this is a hexag training type.
+            //System.out.println("this is hexag type.");
+            canvas.setCanvasType(1);
+            if (winingLocationFound == true)
+                infoBox("Winning location drawn into a green circle on each trial.");
+            else {
+                infoBox("Warning: no winning location found. Probably subject never won.");
+            }
+            this.setVisible(false);
+            this.setSize(570, 450);
+            this.setVisible(true);
+        }
+        else if (type == 1){
+            //System.out.println("this is tmaze type.");
+            canvas.setCanvasType(0);
+            this.setVisible(false);
+            this.setSize(850, 300);
+            this.setVisible(true);
+        }
+    }
+    
     public void openFile(String path) throws FileNotFoundException, IOException {
         System.out.println("openFile: " + path);
         fileOpened = true;
@@ -381,18 +404,10 @@ public class FrameMain extends JFrame implements ChangeListener {
             }
             if ((int) trialArray.get(0).getPoint(0).getX() == 25
                     && (int) trialArray.get(0).getPoint(0).getY() == 25) {
-                // this is a hexag training type.
-                //System.out.println("this is hexag type.");
-                canvas.setCanvasType(1);
-                if (winingLocationFound == true)
-                    infoBox("Winning location drawn into a green circle on each trial.");
-                else {
-                    infoBox("Warning: no winning location found. Probably subject never won.");
-                }
+                setMazeType(0);
             } else if ((int) trialArray.get(0).getPoint(0).getX() == 70
                     && (int) trialArray.get(0).getPoint(0).getY() == 11) {
-                //System.out.println("this is tmaze type.");
-                canvas.setCanvasType(0);
+                setMazeType(1);
             } else {
                 //System.out.println("Unknown type.");
             }

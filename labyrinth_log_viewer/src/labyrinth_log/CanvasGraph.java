@@ -101,8 +101,18 @@ public class CanvasGraph extends JPanel {
         }
         
         g.setColor(Color.BLACK);
-        int xPoly[] = {15 * width / 44 - 15   , 31 * width / 44 - 15  , 41 * width / 44 - 15    , 31 * width / 44 - 15  , 15 * width / 44 - 15,  5 * width / 44 - 15   };
-        int yPoly[] = {4 * height / 44 - 5    , 4 * height / 44 - 5   , 22 * height / 44 - 5   , 40 * height / 44 - 5, 40 * height / 44 - 5   , 22 * height / 44 - 5  };
+        int xPoly[] = {15 * width / 44 - 15   ,
+                31 * width / 44 - 15  , 
+                41 * width / 44 - 15    ,
+                31 * width / 44 - 15  , 
+                15 * width / 44 - 15,  
+                5 * width / 44 - 15   };
+        int yPoly[] = {5 * height / 44 + 15    ,
+                5 * height / 44 + 15   , 
+                23 * height / 44 + 15   ,
+                41 * height / 44 + 15, 
+                41 * height / 44 + 15   , 
+                23 * height / 44 + 15  };
         Polygon poly = new Polygon(xPoly, yPoly, xPoly.length);
         g.drawPolygon(poly);
         
@@ -177,8 +187,13 @@ public class CanvasGraph extends JPanel {
       Graphics2D g = (Graphics2D) g1.create();
       //double dimRelation = g1.getClipBounds().getWidth() / g1.getClipBounds().getHeight();
       
-      int ARR_SIZE_X = (int) (1000 * g1.getClipBounds().getWidth() / transformX);
-      int ARR_SIZE_Y = (int) (1000 * g1.getClipBounds().getHeight() / transformY);
+      int ARR_SIZE_X = (int) (1000.0 * (g1.getClipBounds().getWidth() / g1.getClipBounds().getHeight()) );
+      int ARR_SIZE_Y = (int) (1000.0 * (g1.getClipBounds().getWidth() / g1.getClipBounds().getHeight()) );
+      
+      System.out.println("ARR_SIZE_X: "+ ARR_SIZE_X );
+      System.out.println("ARR_SIZE_Y: "+ ARR_SIZE_X );
+      System.out.println("----");
+      //int ARR_SIZE_Y = 3000; 
       
       double dx = x2 - x1, dy = y2 - y1;
       double angle = Math.atan2(dy, dx);
@@ -199,6 +214,9 @@ public class CanvasGraph extends JPanel {
           System.out.println("Canvas type changed to T-MAZE");
           transformX = 710.0;
           transformY = 165.0;
+          this.setVisible(false);
+          this.setSize(710, 165);
+          this.setVisible(true);
       }
       else if (canvasType == 1){
           System.out.println("Canvas type changed to Hexag");
