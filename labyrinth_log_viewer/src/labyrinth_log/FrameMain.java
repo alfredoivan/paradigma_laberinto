@@ -175,6 +175,23 @@ public class FrameMain extends JFrame implements ChangeListener {
 
         });
         menu.add(checkmenu);
+        
+        final JCheckBoxMenuItem checkmenu2 = new JCheckBoxMenuItem(
+                "Show subject's vision field ?");
+        checkmenu2.setState(false);
+        checkmenu2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                if (checkmenu2.getState() == true) {
+                    canvas.showVField = true;
+                } else {
+                    canvas.showVField = false;
+                }
+                canvas.updateData();
+            }
+
+        });
+        menu.add(checkmenu2);
 
         menuItem = new JMenuItem("Exit", KeyEvent.VK_T);
         menuItem.addActionListener(new ActionListener() {

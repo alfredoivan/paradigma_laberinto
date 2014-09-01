@@ -22,11 +22,14 @@ public class CanvasGraph extends JPanel {
     int subjecty=0;
     int subjectz =0;
     boolean showArrow = true;
+    boolean showVField = false;
     
     double dirx;
     double diry;
     int canvasType = 2; //0: T-Maze ; 1:Hexag. ; 2:no-type
     Point winningPoint = new Point (-50,-50);
+    double transformX = 100.0;
+    double transformY = 100.0;
     
   public CanvasGraph() {
       this.setPreferredSize(new Dimension(200,200));
@@ -46,34 +49,42 @@ public class CanvasGraph extends JPanel {
         g.setColor(Color.black);
         g.fillRect( (width * 10) / 100 , height - ( height / 4 - height / 100 )  , width, height);
         g.fillRect( (width * 10) / 100 ,  0 , width, height / 4 - height / 15);
+        //subject's pos. ; map dimensions: 16 * 71
         g.setColor(Color.BLUE);
-        g.fillOval(xx * width / 71 - 5, height - (yy * height / 16) - 5, 10, 10);
-        
-        
         int xxpos = xx * width / 71 - 5;
         int yypos = height - (yy * height / 16) - 5;
-        
+        g.fillOval(xxpos , yypos, 10, 10);
+        if (showVField){
+            //vision field
+            Color vFieldColour = new Color(71, 214, 0, 128 );
+            g.setColor(vFieldColour);
+            drawVisionField(g, xxpos + 5, yypos + 5, xxpos + 5 + (int)(dirx*20) , yypos + 5 -(int)(diry*20) );
+        }
         
         if (showArrow){
-            g.setColor(Color.DARK_GRAY);
             //arrow
-            g.drawLine(xxpos + 5, yypos + 5, xxpos + 5 + (int)(dirx*20) , yypos + 5 -(int)(diry*20) );
+            g.setColor(Color.DARK_GRAY);
             drawArrow(g, xxpos + 5, yypos + 5, xxpos + 5 + (int)(dirx*20) , yypos + 5 -(int)(diry*20) );
         }
+        
 
     }
     else if (canvasType == 1){
         //hexag. type.
         
-        g.setColor(Color.GREEN);
         int xxpos = xx * width / 44 - 45;
-        int yypos = height - (yy * height / 44) - 5;
+        int yypos = height - (yy * height / 44) - 5 + 29;
         
-        g.fillOval(winningPoint.x * width / 44 - 45 - 1, height - ( (winningPoint.y-3) * height / 44) - 5 - 1, 12, 12);
+        //winning point.
+        g.setColor(Color.GREEN);
+        g.fillOval(winningPoint.x * width / 44 - 45 - 1, height - ( (winningPoint.y-3) * height / 44) - 5 - 1 + 29, 12, 12);
+        
+        //subject's pos. ; map dimensions: 44 * 44
         g.setColor(Color.BLUE);
         g.fillOval(xxpos, yypos, 10, 10);
-        int xPoly[] = {15 * width / 44 - 15   , 31 * width / 44 - 15  , 41 * width / 44 - 15    , 31 * width / 44 - 15  , 15 * width / 44 - 15,  5 * width / 44 - 15   };
-        int yPoly[] = {4 * height / 44 - 5    , 4 * height / 44 - 5   , 22 * height / 44 - 5   , 40 * height / 44 - 5, 40 * height / 44 - 5   , 22 * height / 44 - 5  };
+        //System.out.println("yy: "+ yy + "   yypos: "+ yypos);
+        //System.out.println("xx:"+ xx + "   xxpos: "+ xxpos);
+        
         
         if (showArrow){
             g.setColor(Color.DARK_GRAY);
@@ -81,26 +92,32 @@ public class CanvasGraph extends JPanel {
             g.drawLine(xxpos + 5, yypos + 5, xxpos + 5 + (int)(dirx*20) , yypos + 5 -(int)(diry*20) );
             drawArrow(g, xxpos + 5, yypos + 5, xxpos + 5 + (int)(dirx*20) , yypos + 5 -(int)(diry*20) );
         }
-
+        
+        if (showVField){
+            //vision field
+            Color vFieldColour = new Color(71, 214, 0, 128 );
+            g.setColor(vFieldColour);
+            drawVisionField(g, xxpos + 5, yypos + 5, xxpos + 5 + (int)(dirx*20) , yypos + 5 -(int)(diry*20) );
+        }
         
         g.setColor(Color.BLACK);
+        int xPoly[] = {15 * width / 44 - 15   , 31 * width / 44 - 15  , 41 * width / 44 - 15    , 31 * width / 44 - 15  , 15 * width / 44 - 15,  5 * width / 44 - 15   };
+        int yPoly[] = {4 * height / 44 - 5    , 4 * height / 44 - 5   , 22 * height / 44 - 5   , 40 * height / 44 - 5, 40 * height / 44 - 5   , 22 * height / 44 - 5  };
         Polygon poly = new Polygon(xPoly, yPoly, xPoly.length);
         g.drawPolygon(poly);
         
         //square key.
         g.setColor(Color.CYAN);
-        g.fillRect(37 * width / 44, 32 * height / 44, width/30,  width/30);
+        g.fillRect(42 * width / 44 - 45, height - (20 * height / 44) + width/30 +29, width/30,  width/30);
         
         //triangle key.
         g.setColor(Color.CYAN);
-        int triangPolygonX [] = {5 * width / 44, 7 * width / 44 , 6 * width / 44  };
-        int triangPolygonY [] = {34 * height / 44, 34 * height / 44 , 31 * height / 44  };
-        Polygon polyTriang = new Polygon(triangPolygonX, triangPolygonY, triangPolygonX.length);
-        g.fillPolygon(polyTriang);
+        drawTriangle(g, 7, 20, width, height);
+        
         
         //circle key.
         g.setColor(Color.CYAN);
-        g.fillOval(24 * width / 50, 1 * height / 50, width/30, width/30);
+        g.fillOval(25 * width / 44 - 45 - width/60, 0 , width/30, width/30);
     }
 
   }
@@ -131,6 +148,14 @@ public class CanvasGraph extends JPanel {
       this.updateUI();
   }
   
+  void drawTriangle(Graphics g1, int xpos, int ypos, int width, int height){
+      int triangPolygonX [] = {(xpos-1) * width / 44 - 45, (xpos+1) * width / 44 -45, (xpos) * width / 44 -45 };
+      int triangPolygonY [] = {height - ( (ypos-4) * height / 44) + 29,
+              height - ( (ypos-4) * height / 44) + 29, height - ( (ypos-1) * height / 44)  + 29};
+      Polygon polyTriang = new Polygon(triangPolygonX, triangPolygonY, triangPolygonX.length);
+      g1.fillPolygon(polyTriang);
+  }
+  
   void drawArrow(Graphics g1, int x1, int y1, int x2, int y2) {
       Graphics2D g = (Graphics2D) g1.create();
       int ARR_SIZE = 8;
@@ -148,13 +173,37 @@ public class CanvasGraph extends JPanel {
                     new int[] {0, -ARR_SIZE, ARR_SIZE, 0}, 4);
   }
   
+  void drawVisionField(Graphics g1, int x1, int y1, int x2, int y2) {
+      Graphics2D g = (Graphics2D) g1.create();
+      //double dimRelation = g1.getClipBounds().getWidth() / g1.getClipBounds().getHeight();
+      
+      int ARR_SIZE_X = (int) (1000 * g1.getClipBounds().getWidth() / transformX);
+      int ARR_SIZE_Y = (int) (1000 * g1.getClipBounds().getHeight() / transformY);
+      
+      double dx = x2 - x1, dy = y2 - y1;
+      double angle = Math.atan2(dy, dx);
+      //int len = (int) Math.sqrt(dx*dx + dy*dy);
+      AffineTransform at = AffineTransform.getTranslateInstance(x1, y1);
+      at.concatenate(AffineTransform.getRotateInstance(angle));
+      g.transform(at);
+
+      // Draw horizontal arrow starting in (0, 0)
+      //g.drawLine(0, 0, len, 0);
+      g.fillPolygon(new int[] {0, 0+ARR_SIZE_X  ,  0+ARR_SIZE_X    , 0},
+                    new int[] {0,   -ARR_SIZE_Y ,        ARR_SIZE_Y, 0  }, 4);
+  }
+  
   public void setCanvasType(int nwtype){
       canvasType = nwtype;
       if (canvasType == 0){
           System.out.println("Canvas type changed to T-MAZE");
+          transformX = 710.0;
+          transformY = 165.0;
       }
       else if (canvasType == 1){
           System.out.println("Canvas type changed to Hexag");
+          transformX = 440.0;
+          transformY = 440.0;
       }
   }
   
