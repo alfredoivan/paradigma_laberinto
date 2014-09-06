@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import pygame
 #Vars TMaze class: variables used in the TMaze and Hexagon program.
 class vars_tmaze:
     worldMap=[]
@@ -95,7 +95,8 @@ class vars_tmaze:
 
 
 class Weapon(object):
-    import pygame
+    FPS = 60
+    
     def __init__(self, weaponName="shotgun", frameCount = 5):
         self.images = []
         self.loop = False
@@ -115,16 +116,16 @@ class Weapon(object):
         self.playing = False
         self.loop = False
     def draw(self, surface, time):
-        if(self.playing or self.frame > 0):
-            if(time > self.oldTime + 1./FPS):
-                self.frame = (self.frame+1) % len(self.images)
-                if self.frame == 0: 
-                    if self.loop:
-                        self.frame = 1
-                    else:
-                        self.playing = False
-                        
-                self.oldTime = time
+#         if(self.playing or self.frame > 0):
+#             if(time > self.oldTime + 1./FPS):
+#                 self.frame = (self.frame+1) % len(self.images)
+#                 if self.frame == 0: 
+#                     if self.loop:
+#                         self.frame = 1
+#                     else:
+#                         self.playing = False
+#                         
+#                 self.oldTime = time
         img = self.images[self.frame]
         surface.blit(img, (surface.get_width()/2 - img.get_width()/2, surface.get_height()-img.get_height()))
 
@@ -134,7 +135,6 @@ class Weapon(object):
 
 
 def blit_alpha(target, source, location, opacity):
-        import pygame
         x = location[0]
         y = location[1]
         temp = pygame.Surface((source.get_width(), source.get_height())).convert()

@@ -9,7 +9,13 @@ texHeight = 64
 
 
 class WorldManager(object):
-
+    initx = 0;
+    inity = 0;
+    initdirx = 0.0;
+    initdiry= 0.0;
+    initplanex = 0.0;
+    initplaney = 0.0;
+    
     def __init__(self,worldMap,sprite_positions,x,y,dirx,diry,planex,planey):
         self.sprites = [  
               load_image(pygame.image.load("pics/items/barrel.png").convert(), False, colorKey = (0,0,0)),
@@ -55,6 +61,16 @@ class WorldManager(object):
         self.camera = Camera(x,y,dirx,diry,planex,planey)
         self.worldMap = worldMap
         self.sprite_positions = sprite_positions
+        self.initx = x;
+        self.inity = y;
+        self.initdirx = dirx;
+        self.initdiry = diry;
+        self.initplanex = planex;
+        self.initplaney = planey;
+        pass
+    
+    def resetCamera(self):
+        self.camera = Camera(self.initx,self.inity,self.initdirx,self.initdiry,self.initplanex,self.initplaney)
         pass
     
     def draw(self, surface):
