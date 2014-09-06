@@ -3,7 +3,7 @@
 import pygame
 from pygame.locals import *  # @UnusedWildImport
 import math
-    
+
 texWidth = 64
 texHeight = 64
 
@@ -55,6 +55,8 @@ class WorldManager(object):
         self.camera = Camera(x,y,dirx,diry,planex,planey)
         self.worldMap = worldMap
         self.sprite_positions = sprite_positions
+        pass
+    
     def draw(self, surface):
         w = surface.get_width()
         h = surface.get_height()
@@ -139,7 +141,7 @@ class WorldManager(object):
        
             # calculate lowest and highest pixel to fill in current stripe
             drawStart = - lineHeight / 2 + h / 2
-            drawEnd = lineHeight / 2 + h / 2
+            #drawEnd = lineHeight / 2 + h / 2 # ADD LATER IF NECESSARY
         
             
             #calculate value of wallX
@@ -167,7 +169,7 @@ class WorldManager(object):
 
         #function to sort sprites
         def sprite_compare(s1, s2):
-            import math
+            
             s1Dist = math.sqrt((s1[0] -self.camera.x) ** 2 + (s1[1] -self.camera.y) ** 2)
             s2Dist = math.sqrt((s2[0] -self.camera.x) ** 2 + (s2[1] -self.camera.y) ** 2)  
             if s1Dist>s2Dist:
@@ -204,11 +206,11 @@ class WorldManager(object):
             if (sprite[2] == 4 or sprite[2] == 5 or sprite[2] == 6): #excepción para claves hexág.: única manera de elevar sprites en z
                 spriteHeight *= 4
                 drawStartY = -spriteHeight / 2 + h / 2
-                drawEndY = spriteHeight / 2 + h / 2
+                #drawEndY = spriteHeight / 2 + h / 2 # ADD LATER IF NECESSARY
                 spriteHeight /= 4
             else:
                 drawStartY = -spriteHeight / 2 + h / 2
-                drawEndY = spriteHeight / 2 + h / 2
+                #drawEndY = spriteHeight / 2 + h / 2 # ADD LATER IF NECESSARY
             
             
             #calculate lowest and highest pixel to fill in current stripe
@@ -235,7 +237,7 @@ class WorldManager(object):
                     ##4) ZBuffer, with perpendicular distance
                     if(transformY > 0 and stripe > 0 and stripe < w and transformY < zBuffer[stripe]):
                         surface.blit(pygame.transform.scale(self.sprites[sprite[2]][texX], (1, spriteHeight)), (stripe, drawStartY))
-    
+        pass
 
 class Camera(object):
     def __init__(self,x,y,dirx,diry,planex,planey):
@@ -245,7 +247,7 @@ class Camera(object):
         self.diry = float(diry)
         self.planex = float(planex)
         self.planey = float(planey)
-        
+
 
 def load_image(image, darken, colorKey = None):
     ret = []

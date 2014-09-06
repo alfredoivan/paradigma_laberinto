@@ -187,7 +187,6 @@ def mainFunction():
     pygame.time.delay(500)
     while(True):
         clock.tick(60)
-        wm.draw(screen)
         strobe_value = 0 
         # timing for input and FPS counter
         
@@ -492,6 +491,7 @@ def mainFunction():
             else:
                 pass 
         
+        
         #=======================================================================
         # # Entradas de Teclado.
         #=======================================================================
@@ -556,7 +556,9 @@ def mainFunction():
         ##########################
         #pygame.display.update()
         ##########################
+        wm.draw(screen) #draw changes, then continue to next iteration.
         pygame.display.flip()
+        pass
         #=======================================================================
         # ## Log to file:
         #=======================================================================
@@ -571,6 +573,7 @@ def mainFunction():
             keep_log = True
         elif (strobe_value ==1 and win_value >0):
             keep_log = False
+        pass #end of this iteration.
 
 def add_score():
     #log_to_file("Sujeto GANA.")
