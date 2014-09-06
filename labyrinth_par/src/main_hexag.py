@@ -26,7 +26,6 @@ vectorInstantaneo = vectorSimple.vectorSimple() #vector con el instantáneo de m
 
 
 def mainFunction():
-    global gvars
     pygame.mixer.init()
     pygame.init()
     pygame.display.set_caption("Laberinto Virtual - Hexágono v"+ (HEXAG_VERSION) )
@@ -401,6 +400,7 @@ def mainFunction():
         #############################
         for event in pygame.event.get(): 
             if event.type == QUIT: 
+                finalize_log()
                 os.kill(os.getpid(), signal.SIGINT)
                 sys.exit()
                 return 
@@ -502,16 +502,17 @@ def add_score():
     gvars.set_player_score(gvars.get_player_score() +10)
 
 def log_to_file(string_to_log=""):
-    if (gvars.get_log_to_file_counter() < 30):
+    #if (gvars.get_log_to_file_counter() < 30):
         gvars.log_to_file_matrix.append(string_to_log+'\n')
         gvars.set_log_to_file_counter(gvars.get_log_to_file_counter()+1)
-    else:
-        gvars.log_to_file_matrix.append(string_to_log+'\n')
-        gvars.set_log_to_file_counter(gvars.get_log_to_file_counter()+1)
-        for i in range(0,gvars.get_log_to_file_counter()):
-            gvars.get_log_file().write(gvars.log_to_file_matrix[i]) # python will convert \n to os.linesep
-        gvars.set_log_to_file_counter(0)
-        gvars.log_to_file_matrix=[]
+#     else:
+#         gvars.log_to_file_matrix.append(string_to_log+'\n')
+#         gvars.set_log_to_file_counter(gvars.get_log_to_file_counter()+1)
+#         for i in range(0,gvars.get_log_to_file_counter()):
+#             gvars.get_log_file().write(gvars.log_to_file_matrix[i]) # python will convert \n to os.linesep
+#         gvars.set_log_to_file_counter(0)
+#         gvars.log_to_file_matrix=[]
+        pass
 
 def finalize_log():
     for i in range(0,gvars.get_log_to_file_counter()):
