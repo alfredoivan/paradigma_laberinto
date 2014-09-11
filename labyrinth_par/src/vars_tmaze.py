@@ -6,6 +6,7 @@ class vars_tmaze:
     sprite_positions=[]
     log_to_file_matrix=[]
     
+    joystick_working = False #true if it is working..
     
     def __init__(self):
         self.__anim_count = 0 #variable que indica el fotograma de la animación de fin de experimento.

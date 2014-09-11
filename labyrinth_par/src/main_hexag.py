@@ -2,6 +2,7 @@
 
 import pygame
 from pygame.locals import * # @UnusedWildImport
+from random import randint
 import vectorSimple
 import vars_tmaze
 import math
@@ -17,7 +18,7 @@ HEXAG_VERSION = "1.3.1"
 CYCLE_LOOP_NUMBER = 2 #cantidad de ciclos que deben pasar para que se ejecuten los movimientos en el mapa 3D
 IMG_WIN_MONEY = pygame.image.load('pics/items/money.png')
 IMG_LOSE_SADFACE = pygame.image.load('pics/items/sadface.gif')
-FPS = 8
+#FPS = 8
 WHITE_SQUARE = Rect(0, 0, 100, 100)
 
 vectorInstantaneo = vectorSimple.vectorSimple() #vector con el instantáneo de movimiento, x e y dependen del estado de joystick.
@@ -25,47 +26,69 @@ vectorInstantaneo = vectorSimple.vectorSimple() #vector con el instantáneo de m
 
 
 
+
+
 def mainFunction():
-    pygame.mixer.init()
-    pygame.init()
-    pygame.display.set_caption("Laberinto Virtual - Hexágono v"+ (HEXAG_VERSION) )
+    initPygame()
     
-    #size = w, h = 1600,900
-    size = width_screen, height_screen = 1366,768
+    initJoystick()
     
-    #window = pygame.display.set_mode(size)
-    pygame.display.set_mode(size, pygame.FULLSCREEN)
+    initHexagMaze()
     
     
-    screen = pygame.display.get_surface()
-    #pixScreen = pygame.surfarray.pixels2d(screen)
-    pygame.mouse.set_visible(False)
-    clock = pygame.time.Clock()
+    initial_frames_latency = 7 #7 latency frames to smooth the initialization.
+    #===========================================================================
+    # #variables de logeo: strobe_value, win_value. Se graban en archivo de log al final del bucle
+    #===========================================================================
+    gvars.strobe_value = 0 # 0=Negro 1=Blanco
+    gvars.win_value = 0 #0=en juego , 1=perdió , 2=ganó
+    gvars.win_value_f = 0 #se guarda en memoria si se gana o pierde, y se pone en log sólo cuando hay un strobe
+    gvars.keep_log = False #true=logear este ciclo. Permite no logear los intersticios de
+    #                       tiempo en donde ya se sabe que ganó y hasta el siguiente strobe de reinicio..
     
-    # Initialize the joysticks
-    joystick_working = False
-    try:
-        pygame.joystick.init()
-        my_joystick = pygame.joystick.Joystick(0)
-        my_joystick.init()
-        joystick_working = True
-    except:
-        #log_to_file("Joystick incompatible o no encontrado.")
-        joystick_working = False
+    pygame.time.delay(500)
     
-    
-    
-    #################################################################
-    #declaro unas variables útiles para calcular deltas de movimiento
-    #################################################################
-    #t = threading.Timer(4.0, socketTimer)
-    #t.start() # luego de 4 segundos arranca.
-    time.sleep(1.5)
-    
+    while(True):
+        if (initial_frames_latency > 0):
+            initial_frames_latency -= 1
+        
+        gvars.wm.draw(gvars.screen)
+        gvars.clock.tick(60)
+        
+        gvars.strobe_value = 0 
+        
+        drawScoreBar();
+        
+        evalHexagWin()
+        
+        movementSpeedCalculation()
+        
+        hexagDoorAnimations()
+        
+        joystickInput()
+        
+        analyzeHexagCollisions()
+        
+        pyEventsHandle()
+        
+        keyboardInput()
+        
+        evalWhiteSquare()
+        
+        
+        ##########################
+        #pygame.display.update()
+        ##########################
+        if (initial_frames_latency == 0):
+            pygame.display.flip()
+        
+        log_frame();
+
+def initHexagMaze():
+    gvars.set_anim_count( 61) #to reset on initialization.
     #################################################################
     ### Elección de puerta que tiene recompensa.
     #################################################################
-    from random import randint
     rndnum = randint(0,5)
                 
     gvars.set_num_puerta(rndnum)
@@ -88,47 +111,19 @@ def mainFunction():
     elif rndnum == 5:
                     gvars.set_posx_to_set(39.487556 )
                     gvars.set_posy_to_set(48.143990 )
-                
+    
+    #put "money" sprite:
     for i in range(0, len(gvars.sprite_positions)):
                     _texnum_=gvars.sprite_positions[i].__getitem__(2)
                     if (_texnum_ == 14):
                         gvars.sprite_positions[i] = (gvars.get_posx_to_set(), gvars.get_posy_to_set(), 14)
-    
     ########################
-    wm = worldManager.WorldManager(gvars.worldMap,gvars.sprite_positions, 25, 25.5, -1, 0, 0, 1)
+    #worldmap for hexag.
     ###
-    time.sleep(0.2) #added t.sleep just in case.
-    initial_latency = 7 #7 latency frames to smooth the initialization.
+    gvars.wm = worldManager.WorldManager(gvars.worldMap,gvars.sprite_positions, 25, 25.5, -1, 0, 0, 1)
     
-    #===========================================================================
-    # #variables de logeo: strobe_value, win_value. Se graban en archivo de log al final del bucle
-    #===========================================================================
-    strobe_value = 0 # 0=Negro 1=Blanco
-    win_value = 0 #0=en juego , 1=perdió , 2=ganó
-    win_value_f = 0 #se guarda en memoria si se gana o pierde, y se pone en log sólo cuando hay un strobe
-    keep_log = False #true=logear este ciclo. Permite no logear los intersticios de 
-    #tiempo en donde ya se sabe que ganó y hasta el siguiente strobe de reinicio..
-    gvars.set_anim_count( 61)
-    pygame.time.delay(500)
-    wm.draw(screen)
-    while(True):
-        if (initial_latency > 0):
-            initial_latency -= 1
-        wm.draw(screen)
-        clock.tick(60)
-        
-        strobe_value = 0 
-        # timing for input and FPS counter
-        
-        frameTime = float(clock.get_time()) / 1000.0 # frameTime is the time this frame has taken, in seconds
-        #text = f.render(str(clock.get_fps()), False, (255, 255, 0))
-        #screen.blit(text, text.get_rect(), text.get_rect())
-        pass
-        #=======================================================================
-        # ##dibujo barra de puntaje
-        #=======================================================================
-        pygame.draw.rect(screen, (0,0,235), (50-5,height_screen/2-5-gvars.get_player_score(),15+10,gvars.get_player_score()+1+8), 0)
-        pygame.draw.rect(screen, (0,0,255), (50,height_screen/2-gvars.get_player_score(),15,gvars.get_player_score()+1), 0)
+
+def evalHexagWin():
         #=======================================================================
         # # Animación de ganaste / perdiste:
         #=======================================================================
@@ -145,10 +140,10 @@ def mainFunction():
             
         #animación durante 60 ciclos, de ganaste o perdiste
         if (gvars.get_anim_count() >0 and gvars.get_anim_count() < 60):
-                vars_tmaze.blit_alpha(screen, IMG_WIN_MONEY, (width_screen/2 -250,0), 255-gvars.get_anim_count()*4)
+                vars_tmaze.blit_alpha(gvars.screen, IMG_WIN_MONEY, (gvars.width_screen/2 -250,0), 255-gvars.get_anim_count()*4)
                 gvars.set_anim_count(gvars.get_anim_count()+4)
         if (gvars.get_anim_count() >70 and gvars.get_anim_count() < 130):
-                vars_tmaze.blit_alpha(screen, IMG_LOSE_SADFACE, (width_screen/2 -250,0), 255-(gvars.get_anim_count()-70)*4)
+                vars_tmaze.blit_alpha(gvars.screen, IMG_LOSE_SADFACE, (gvars.width_screen/2 -250,0), 255-(gvars.get_anim_count()-70)*4)
                 gvars.set_anim_count(gvars.get_anim_count()+4)
         if (gvars.get_anim_count() == 61 or gvars.get_anim_count() == 131):
             gvars.set_anim_count (0) #fin animación, reiniciamos experimento.
@@ -163,19 +158,19 @@ def mainFunction():
                 if ( _texnum_ > 7 and  _texnum_ < 14):
                     gvars.sprite_positions[i] = ( gvars.sprite_positions[i].__getitem__(0), gvars.sprite_positions[i].__getitem__(1), 7 )
             #time.sleep(0.05)
-            wm = worldManager.WorldManager(gvars.worldMap,gvars.sprite_positions, 25, 25.5, -1, 0, 0, 1)
+            gvars.wm = worldManager.WorldManager(gvars.worldMap,gvars.sprite_positions, 25, 25.5, -1, 0, 0, 1)
             ########################
             #randomizar la cámara:
             ########################
             temp_rand_num = randint(0,30)
             flt_num = (temp_rand_num *2*3.1415)/ 30
             #en flt_num tengo un ángulo aleatorio entre 0 y 2pi
-            oldDirX = wm.camera.dirx
-            wm.camera.dirx = wm.camera.dirx * math.cos(flt_num) - wm.camera.diry * math.sin(flt_num)
-            wm.camera.diry = oldDirX * math.sin(flt_num) + wm.camera.diry * math.cos(flt_num)
-            oldPlaneX = wm.camera.planex
-            wm.camera.planex = wm.camera.planex * math.cos(flt_num) - wm.camera.planey * math.sin(flt_num)
-            wm.camera.planey = oldPlaneX * math.sin(flt_num) + wm.camera.planey * math.cos(flt_num)
+            oldDirX = gvars.wm.camera.dirx
+            gvars.wm.camera.dirx = gvars.wm.camera.dirx * math.cos(flt_num) - gvars.wm.camera.diry * math.sin(flt_num)
+            gvars.wm.camera.diry = oldDirX * math.sin(flt_num) + gvars.wm.camera.diry * math.cos(flt_num)
+            oldPlaneX = gvars.wm.camera.planex
+            gvars.wm.camera.planex = gvars.wm.camera.planex * math.cos(flt_num) - gvars.wm.camera.planey * math.sin(flt_num)
+            gvars.wm.camera.planey = oldPlaneX * math.sin(flt_num) + gvars.wm.camera.planey * math.cos(flt_num)
             ###
             #remuevo el ítem de ganado, para que no se vea entre las texturas de puerta:
             for i in range(0, len(gvars.sprite_positions)):
@@ -184,20 +179,17 @@ def mainFunction():
                         gvars.sprite_positions[i] = (0.5, 0.5, 14)
             #en cada reinicio: se pone cuadrado blanco
             gvars.set_init_whitebox(0) #en 2 ciclos se pondrá efectivamente el cuadrado blanco.
-            win_value = 0
-            win_value_f = 0
+            gvars.win_value = 0
+            gvars.win_value_f = 0
+        pass
 
-        ###############################################
-        # speed modifiers (desplazamiento, rotación)
-        ###############################################
-        moveSpeed = frameTime * 10.2 # the constant value is in squares / second
-        rotSpeed = frameTime * 1.5 # the constant value is in radians / second
-        
+def hexagDoorAnimations():
+        #evaluates door animations and set win or lose.
         if (gvars.get_door_anim() > 0):
             if (gvars.get_door_anim() < 10):
-                for i in range(0, len(wm.sprite_positions)):
-                    if (wm.sprite_positions[i].__getitem__(2) == gvars.get_door_anim()+6):
-                        wm.sprite_positions[i] = ( wm.sprite_positions[i].__getitem__(0), wm.sprite_positions[i].__getitem__(1), gvars.get_door_anim()+7 )
+                for i in range(0, len(gvars.wm.sprite_positions)):
+                    if (gvars.wm.sprite_positions[i].__getitem__(2) == gvars.get_door_anim()+6):
+                        gvars.wm.sprite_positions[i] = ( gvars.wm.sprite_positions[i].__getitem__(0), gvars.wm.sprite_positions[i].__getitem__(1), gvars.get_door_anim()+7 )
             if (gvars.get_door_anim() == 60):
                 gvars.set_door_anim(6)
                 #para ver el cuadrado blanco ya:
@@ -225,18 +217,193 @@ def mainFunction():
                     _texnum_=gvars.sprite_positions[i].__getitem__(2)
                     if (_texnum_ == 14):
                         gvars.sprite_positions[i] = (gvars.get_posx_to_set(), gvars.get_posy_to_set(), 14)
+        
+        pass
+
+def analyzeHexagCollisions():
+        ##################################################################
+        # Análisis áreas. Colisiones:
+        ##################################################################
+        
+        colision_puerta = False
+        DOOR_RADIUS_POW2 = 9.9225 #radio 3.15
+        
+        #Puerta que está en: (12.1535  , 47.025, 7),
+        if ( pow(abs(gvars.wm.camera.x  - 12.1535), 2) < DOOR_RADIUS_POW2 and  pow(abs(gvars.wm.camera.y  - 47.025), 2 ) < DOOR_RADIUS_POW2   ):
+            colision_puerta = True
+            if (gvars.get_num_puerta() == 0):
+                #print "ganaste"
+                if (gvars.get_anim_count () == 0):
+                    gvars.set_anim_count (201)
+                    gvars.win_value_f = 2
+                    add_score()
+            else:
+                #print "perdiste"
+                if (gvars.get_anim_count () == 0):
+                    gvars.set_anim_count (271)
+                    gvars.win_value_f = 1
+        
+        
+        #Puerta que está en: (3.2796 , 26.6061, 7),
+        if (pow(abs(gvars.wm.camera.x  - 3.2796),2) < DOOR_RADIUS_POW2 and  pow(abs(gvars.wm.camera.y  - 26.6061),2 ) < DOOR_RADIUS_POW2 ):
+            colision_puerta = True
+            if (gvars.get_num_puerta() == 1):
+                #print "ganaste"
+                if (gvars.get_anim_count () == 0):
+                    gvars.set_anim_count (201)
+                    gvars.win_value_f = 2
+                    add_score()
+            else:
+                #print "perdiste"
+                if (gvars.get_anim_count () == 0):
+                    gvars.set_anim_count (271)
+                    gvars.win_value_f = 1
+            
+        #Puerta que está en: (11.0158 , 5.1344, 7),
+        if (  pow(abs(gvars.wm.camera.x  - 11.0158), 2) < DOOR_RADIUS_POW2 and  pow(abs(gvars.wm.camera.y  - 5.1344),2) < DOOR_RADIUS_POW2 ):
+            colision_puerta = True
+            if (gvars.get_num_puerta() == 2):
+                #print "ganaste"
+                if (gvars.get_anim_count () == 0):
+                    gvars.set_anim_count (201)
+                    gvars.win_value_f = 2
+                    add_score()
+            else:
+                #print "perdiste"
+                if (gvars.get_anim_count () == 0):
+                    gvars.set_anim_count (271)
+                    gvars.win_value_f = 1
+        
+        #Puerta que está en: (38.9078 , 4.8715, 7),
+        if ( pow(abs(gvars.wm.camera.x  - 38.9078), 2) < DOOR_RADIUS_POW2 and  pow(abs(gvars.wm.camera.y  - 4.8715), 2) < DOOR_RADIUS_POW2 ):
+            colision_puerta = True
+            if (gvars.get_num_puerta() == 3):
+                #print "ganaste"
+                if (gvars.get_anim_count () == 0):
+                    gvars.set_anim_count (201)
+                    gvars.win_value_f = 2
+                    add_score()
+            else:
+                #print "perdiste"
+                if (gvars.get_anim_count () == 0):
+                    gvars.set_anim_count (271)
+                    gvars.win_value_f = 1
+            
+        #Puerta que está en: (47.41795 , 26.33015, 7),
+        if ( pow(abs(gvars.wm.camera.x  - 47.41795) ,2 ) < DOOR_RADIUS_POW2 and  pow(abs(gvars.wm.camera.y  - 26.33015) ,2 ) < DOOR_RADIUS_POW2 ):
+            colision_puerta = True
+            if (gvars.get_num_puerta() == 4):
+                #print "ganaste"
+                if (gvars.get_anim_count () == 0):
+                    gvars.set_anim_count (201)
+                    gvars.win_value_f = 2
+                    add_score()
+            else:
+                #print "perdiste"
+                if (gvars.get_anim_count () == 0):
+                    gvars.set_anim_count (271)
+                    gvars.win_value_f = 1
+        
+        #Puerta que está en: (37.95235 , 46.89345, 7)
+        if ( pow(abs(gvars.wm.camera.x  - 37.95235) , 2) < DOOR_RADIUS_POW2 and  pow(abs(gvars.wm.camera.y  - 46.89345), 2) < DOOR_RADIUS_POW2 ):
+            colision_puerta = True
+            if (gvars.get_num_puerta() == 5):
+                #print "ganaste"
+                if (gvars.get_anim_count () == 0):
+                    gvars.set_anim_count (201)
+                    gvars.win_value_f = 2
+                    add_score()
+            else:
+                #print "perdiste"
+                if (gvars.get_anim_count () == 0):
+                    gvars.set_anim_count (271)
+                    gvars.win_value_f = 1
                 
             
         
+        if (colision_puerta):
+            #print "colsión"
+            if (gvars.get_door_anim () == 0):
+                    gvars.set_door_anim (1)
+        pass
+
+def evalWhiteSquare():
+    ##########################
+    # Cuadrado blanco:
+    ##########################
+    pygame.draw.rect(gvars.screen, Color('black'), WHITE_SQUARE)
+    if (gvars.get_init_whitebox()< 8):
+        pygame.draw.rect(gvars.screen, Color('black'), WHITE_SQUARE)
+        if (gvars.get_init_whitebox() == 2):
+            pygame.draw.rect(gvars.screen, Color('white'), WHITE_SQUARE)
+            pygame.display.flip()   #Update screen
+            pygame.time.delay(100)
+            gvars.strobe_value = 1
+            gvars.win_value = gvars.win_value_f
+        gvars.set_init_whitebox( gvars.get_init_whitebox()+1 )
+    pass
+
+def keyboardInput():
+    
+        #=======================================================================
+        # # Entradas de Teclado.
+        #=======================================================================
+        if (gvars.get_delay_reboot_button() > 0):
+            gvars.set_delay_reboot_button(gvars.get_delay_reboot_button()+1)
+            
+        if (gvars.get_delay_reboot_button() == 12):
+            gvars.set_delay_reboot_button(0)
+        if (gvars.get_door_anim() == 0 and gvars.keep_log == True):
+            keys = pygame.key.get_pressed()
+            if keys[K_SPACE]:
+                #Forzar Reinicio: como si hubiera ganado o perdido.
+                if (gvars.get_delay_reboot_button() ==0):
+                    gvars.set_delay_reboot_button(1)
+                    gvars.set_anim_count (61)
+            ###############
+            # Desplazarse con UP DOWN LEFT RIGHT
+            if keys[K_UP]:
+                # move forward if no wall in front of you
+                moveX = gvars.wm.camera.x + gvars.wm.camera.dirx * gvars.moveSpeed
+                if(gvars.worldMap[int(moveX)][int(gvars.wm.camera.y)]==0 and gvars.worldMap[int(moveX + 0.1)][int(gvars.wm.camera.y)]==0):gvars.wm.camera.x += gvars.wm.camera.dirx * gvars.moveSpeed
+                moveY = gvars.wm.camera.y + gvars.wm.camera.diry * gvars.moveSpeed
+                if(gvars.worldMap[int(gvars.wm.camera.x)][int(moveY)]==0 and gvars.worldMap[int(gvars.wm.camera.x)][int(moveY + 0.1)]==0):gvars.wm.camera.y += gvars.wm.camera.diry * gvars.moveSpeed
+            if keys[K_DOWN]:
+                # move backwards if no wall behind you
+                if(gvars.worldMap[int(gvars.wm.camera.x - gvars.wm.camera.dirx * gvars.moveSpeed)][int(gvars.wm.camera.y)] == 0):gvars.wm.camera.x -= gvars.wm.camera.dirx * gvars.moveSpeed
+                if(gvars.worldMap[int(gvars.wm.camera.x)][int(gvars.wm.camera.y - gvars.wm.camera.diry * gvars.moveSpeed)] == 0):gvars.wm.camera.y -= gvars.wm.camera.diry * gvars.moveSpeed
+            if (keys[K_RIGHT] and not keys[K_DOWN]) or (keys[K_LEFT] and keys[K_DOWN]):
+                # rotate to the right
+                # both camera direction and camera plane must be rotated
+                oldDirX = gvars.wm.camera.dirx
+                gvars.wm.camera.dirx = gvars.wm.camera.dirx * math.cos(- gvars.rotSpeed) - gvars.wm.camera.diry * math.sin(- gvars.rotSpeed)
+                gvars.wm.camera.diry = oldDirX * math.sin(- gvars.rotSpeed) + gvars.wm.camera.diry * math.cos(- gvars.rotSpeed)
+                oldPlaneX = gvars.wm.camera.planex
+                gvars.wm.camera.planex = gvars.wm.camera.planex * math.cos(- gvars.rotSpeed) - gvars.wm.camera.planey * math.sin(- gvars.rotSpeed)
+                gvars.wm.camera.planey = oldPlaneX * math.sin(- gvars.rotSpeed) + gvars.wm.camera.planey * math.cos(- gvars.rotSpeed)
+            if (keys[K_LEFT] and not keys[K_DOWN]) or (keys[K_RIGHT] and keys[K_DOWN]): 
+                # rotate to the left
+                # both camera direction and camera plane must be rotated
+                oldDirX = gvars.wm.camera.dirx
+                gvars.wm.camera.dirx = gvars.wm.camera.dirx * math.cos(gvars.rotSpeed) - gvars.wm.camera.diry * math.sin(gvars.rotSpeed)
+                gvars.wm.camera.diry = oldDirX * math.sin(gvars.rotSpeed) + gvars.wm.camera.diry * math.cos(gvars.rotSpeed)
+                oldPlaneX = gvars.wm.camera.planex
+                gvars.wm.camera.planex = gvars.wm.camera.planex * math.cos(gvars.rotSpeed) - gvars.wm.camera.planey * math.sin(gvars.rotSpeed)
+                gvars.wm.camera.planey = oldPlaneX * math.sin(gvars.rotSpeed) + gvars.wm.camera.planey * math.cos(gvars.rotSpeed)
+            
+        
+
+def joystickInput():
         ############################################
         # Toma de datos de Joystick
         ############################################
         #x e y
+        
         x=0
         y=0
-        if (joystick_working==True and gvars.get_door_anim() == 0 and keep_log == True):
-            x = my_joystick.get_axis(0)
-            y = my_joystick.get_axis(1)
+        if (gvars.joystick_working==True and gvars.get_door_anim() == 0 and gvars.keep_log == True):
+            x = gvars.my_joystick.get_axis(0)
+            y = gvars.my_joystick.get_axis(1)
         x_ax1= int(x )
         x_ax2 = int(x +0.1)
         x_ax = 0
@@ -251,7 +418,6 @@ def mainFunction():
             y_ax = -1
         if y_ax2 == 1:
             y_ax = 1
-        global vectorInstantaneo
         vectorInstantaneo.x = int(2.2*x_ax)
         vectorInstantaneo.y = int(2.2*y_ax)
         #=======================================================================
@@ -261,140 +427,36 @@ def mainFunction():
             #for each rotation unit divided by 30 (maximum vector module allowed)
             # rotate to the left
             # both camera direction and camera plane must be rotated
-            oldDirX = wm.camera.dirx
-            wm.camera.dirx = wm.camera.dirx * math.cos(rotSpeed) - wm.camera.diry * math.sin(rotSpeed)
-            wm.camera.diry = oldDirX * math.sin(rotSpeed) + wm.camera.diry * math.cos(rotSpeed)
-            oldPlaneX = wm.camera.planex
-            wm.camera.planex = wm.camera.planex * math.cos(rotSpeed) - wm.camera.planey * math.sin(rotSpeed)
-            wm.camera.planey = oldPlaneX * math.sin(rotSpeed) + wm.camera.planey * math.cos(rotSpeed)
+            oldDirX = gvars.wm.camera.dirx
+            gvars.wm.camera.dirx = gvars.wm.camera.dirx * math.cos(gvars.rotSpeed) - gvars.wm.camera.diry * math.sin(gvars.rotSpeed)
+            gvars.wm.camera.diry = oldDirX * math.sin(gvars.rotSpeed) + gvars.wm.camera.diry * math.cos(gvars.rotSpeed)
+            oldPlaneX = gvars.wm.camera.planex
+            gvars.wm.camera.planex = gvars.wm.camera.planex * math.cos(gvars.rotSpeed) - gvars.wm.camera.planey * math.sin(gvars.rotSpeed)
+            gvars.wm.camera.planey = oldPlaneX * math.sin(gvars.rotSpeed) + gvars.wm.camera.planey * math.cos(gvars.rotSpeed)
         if vectorInstantaneo.y < 0:
             #print "movió arriba"
-            moveX = wm.camera.x + wm.camera.dirx * moveSpeed
-            if(gvars.worldMap[int(moveX)][int(wm.camera.y)]==0 and gvars.worldMap[int(moveX + 0.1)][int(wm.camera.y)]==0):wm.camera.x += wm.camera.dirx * moveSpeed
-            moveY = wm.camera.y + wm.camera.diry * moveSpeed
-            if(gvars.worldMap[int(wm.camera.x)][int(moveY)]==0 and gvars.worldMap[int(wm.camera.x)][int(moveY + 0.1)]==0):wm.camera.y += wm.camera.diry * moveSpeed
+            moveX = gvars.wm.camera.x + gvars.wm.camera.dirx * gvars.moveSpeed
+            if(gvars.worldMap[int(moveX)][int(gvars.wm.camera.y)]==0 and gvars.worldMap[int(moveX + 0.1)][int(gvars.wm.camera.y)]==0):gvars.wm.camera.x += gvars.wm.camera.dirx * gvars.moveSpeed
+            moveY = gvars.wm.camera.y + gvars.wm.camera.diry * gvars.moveSpeed
+            if(gvars.worldMap[int(gvars.wm.camera.x)][int(moveY)]==0 and gvars.worldMap[int(gvars.wm.camera.x)][int(moveY + 0.1)]==0):gvars.wm.camera.y += gvars.wm.camera.diry * gvars.moveSpeed
         if vectorInstantaneo.x > 0:
             #print "movió derecha"
             # rotate to the right
             # both camera direction and camera plane must be rotated
-            oldDirX = wm.camera.dirx
-            wm.camera.dirx = wm.camera.dirx * math.cos(- rotSpeed) - wm.camera.diry * math.sin(- rotSpeed)
-            wm.camera.diry = oldDirX * math.sin(- rotSpeed) + wm.camera.diry * math.cos(- rotSpeed)
-            oldPlaneX = wm.camera.planex
-            wm.camera.planex = wm.camera.planex * math.cos(- rotSpeed) - wm.camera.planey * math.sin(- rotSpeed)
-            wm.camera.planey = oldPlaneX * math.sin(- rotSpeed) + wm.camera.planey * math.cos(- rotSpeed)
+            oldDirX = gvars.wm.camera.dirx
+            gvars.wm.camera.dirx = gvars.wm.camera.dirx * math.cos(- gvars.rotSpeed) - gvars.wm.camera.diry * math.sin(- gvars.rotSpeed)
+            gvars.wm.camera.diry = oldDirX * math.sin(- gvars.rotSpeed) + gvars.wm.camera.diry * math.cos(- gvars.rotSpeed)
+            oldPlaneX = gvars.wm.camera.planex
+            gvars.wm.camera.planex = gvars.wm.camera.planex * math.cos(- gvars.rotSpeed) - gvars.wm.camera.planey * math.sin(- gvars.rotSpeed)
+            gvars.wm.camera.planey = oldPlaneX * math.sin(- gvars.rotSpeed) + gvars.wm.camera.planey * math.cos(- gvars.rotSpeed)
         if vectorInstantaneo.y > 0:
             #print "movió abajo"
             # move backwards if no wall behind you
-            if(gvars.worldMap[int(wm.camera.x - wm.camera.dirx * moveSpeed)][int(wm.camera.y)] == 0):wm.camera.x -= wm.camera.dirx * moveSpeed
-            if(gvars.worldMap[int(wm.camera.x)][int(wm.camera.y - wm.camera.diry * moveSpeed)] == 0):wm.camera.y -= wm.camera.diry * moveSpeed
+            if(gvars.worldMap[int(gvars.wm.camera.x - gvars.wm.camera.dirx * gvars.moveSpeed)][int(gvars.wm.camera.y)] == 0):gvars.wm.camera.x -= gvars.wm.camera.dirx * gvars.moveSpeed
+            if(gvars.worldMap[int(gvars.wm.camera.x)][int(gvars.wm.camera.y - gvars.wm.camera.diry * gvars.moveSpeed)] == 0):gvars.wm.camera.y -= gvars.wm.camera.diry * gvars.moveSpeed
         
-        ####################################################################   
-        ##################################################################
-        # Análisis áreas. Colisiones:
-        ##################################################################
-        
-        colision_puerta = False
-        DOOR_RADIUS_POW2 = 9.9225 #radio 3.15
-        
-        #Puerta que está en: (12.1535  , 47.025, 7),
-        if ( pow(abs(wm.camera.x  - 12.1535), 2) < DOOR_RADIUS_POW2 and  pow(abs(wm.camera.y  - 47.025), 2 ) < DOOR_RADIUS_POW2   ):
-            colision_puerta = True
-            if (gvars.get_num_puerta() == 0):
-                #print "ganaste"
-                if (gvars.get_anim_count () == 0):
-                    gvars.set_anim_count (201)
-                    win_value_f = 2
-                    add_score()
-            else:
-                #print "perdiste"
-                if (gvars.get_anim_count () == 0):
-                    gvars.set_anim_count (271)
-                    win_value_f = 1
-        
-        
-        #Puerta que está en: (3.2796 , 26.6061, 7),
-        if (pow(abs(wm.camera.x  - 3.2796),2) < DOOR_RADIUS_POW2 and  pow(abs(wm.camera.y  - 26.6061),2 ) < DOOR_RADIUS_POW2 ):
-            colision_puerta = True
-            if (gvars.get_num_puerta() == 1):
-                #print "ganaste"
-                if (gvars.get_anim_count () == 0):
-                    gvars.set_anim_count (201)
-                    win_value_f = 2
-                    add_score()
-            else:
-                #print "perdiste"
-                if (gvars.get_anim_count () == 0):
-                    gvars.set_anim_count (271)
-                    win_value_f = 1
-            
-        #Puerta que está en: (11.0158 , 5.1344, 7),
-        if (  pow(abs(wm.camera.x  - 11.0158), 2) < DOOR_RADIUS_POW2 and  pow(abs(wm.camera.y  - 5.1344),2) < DOOR_RADIUS_POW2 ):
-            colision_puerta = True
-            if (gvars.get_num_puerta() == 2):
-                #print "ganaste"
-                if (gvars.get_anim_count () == 0):
-                    gvars.set_anim_count (201)
-                    win_value_f = 2
-                    add_score()
-            else:
-                #print "perdiste"
-                if (gvars.get_anim_count () == 0):
-                    gvars.set_anim_count (271)
-                    win_value_f = 1
-        
-        #Puerta que está en: (38.9078 , 4.8715, 7),
-        if ( pow(abs(wm.camera.x  - 38.9078), 2) < DOOR_RADIUS_POW2 and  pow(abs(wm.camera.y  - 4.8715), 2) < DOOR_RADIUS_POW2 ):
-            colision_puerta = True
-            if (gvars.get_num_puerta() == 3):
-                #print "ganaste"
-                if (gvars.get_anim_count () == 0):
-                    gvars.set_anim_count (201)
-                    win_value_f = 2
-                    add_score()
-            else:
-                #print "perdiste"
-                if (gvars.get_anim_count () == 0):
-                    gvars.set_anim_count (271)
-                    win_value_f = 1
-            
-        #Puerta que está en: (47.41795 , 26.33015, 7),
-        if ( pow(abs(wm.camera.x  - 47.41795) ,2 ) < DOOR_RADIUS_POW2 and  pow(abs(wm.camera.y  - 26.33015) ,2 ) < DOOR_RADIUS_POW2 ):
-            colision_puerta = True
-            if (gvars.get_num_puerta() == 4):
-                #print "ganaste"
-                if (gvars.get_anim_count () == 0):
-                    gvars.set_anim_count (201)
-                    win_value_f = 2
-                    add_score()
-            else:
-                #print "perdiste"
-                if (gvars.get_anim_count () == 0):
-                    gvars.set_anim_count (271)
-                    win_value_f = 1
-        
-        #Puerta que está en: (37.95235 , 46.89345, 7)
-        if ( pow(abs(wm.camera.x  - 37.95235) , 2) < DOOR_RADIUS_POW2 and  pow(abs(wm.camera.y  - 46.89345), 2) < DOOR_RADIUS_POW2 ):
-            colision_puerta = True
-            if (gvars.get_num_puerta() == 5):
-                #print "ganaste"
-                if (gvars.get_anim_count () == 0):
-                    gvars.set_anim_count (201)
-                    win_value_f = 2
-                    add_score()
-            else:
-                #print "perdiste"
-                if (gvars.get_anim_count () == 0):
-                    gvars.set_anim_count (271)
-                    win_value_f = 1
-                
-            
-        
-        if (colision_puerta):
-            #print "colsión"
-            if (gvars.get_door_anim () == 0):
-                    gvars.set_door_anim (1)
-        
+
+def pyEventsHandle():
         #############################
         ## Eventos de Pygame (handle del quit)
         #############################
@@ -415,87 +477,74 @@ def mainFunction():
                 #    print """"""      
             else:
                 pass 
-        
-        #=======================================================================
-        # # Entradas de Teclado.
-        #=======================================================================
-        if (gvars.get_delay_reboot_button() > 0):
-            gvars.set_delay_reboot_button(gvars.get_delay_reboot_button()+1)
-            
-        if (gvars.get_delay_reboot_button() == 12):
-            gvars.set_delay_reboot_button(0)
-        if (gvars.get_door_anim() == 0 and keep_log == True):
-            keys = pygame.key.get_pressed()
-            if keys[K_SPACE]:
-                #Forzar Reinicio: como si hubiera ganado o perdido.
-                if (gvars.get_delay_reboot_button() ==0):
-                    gvars.set_delay_reboot_button(1)
-                    gvars.set_anim_count (61)
-            ###############
-            # Desplazarse con UP DOWN LEFT RIGHT
-            if keys[K_UP]:
-                # move forward if no wall in front of you
-                moveX = wm.camera.x + wm.camera.dirx * moveSpeed
-                if(gvars.worldMap[int(moveX)][int(wm.camera.y)]==0 and gvars.worldMap[int(moveX + 0.1)][int(wm.camera.y)]==0):wm.camera.x += wm.camera.dirx * moveSpeed
-                moveY = wm.camera.y + wm.camera.diry * moveSpeed
-                if(gvars.worldMap[int(wm.camera.x)][int(moveY)]==0 and gvars.worldMap[int(wm.camera.x)][int(moveY + 0.1)]==0):wm.camera.y += wm.camera.diry * moveSpeed
-            if keys[K_DOWN]:
-                # move backwards if no wall behind you
-                if(gvars.worldMap[int(wm.camera.x - wm.camera.dirx * moveSpeed)][int(wm.camera.y)] == 0):wm.camera.x -= wm.camera.dirx * moveSpeed
-                if(gvars.worldMap[int(wm.camera.x)][int(wm.camera.y - wm.camera.diry * moveSpeed)] == 0):wm.camera.y -= wm.camera.diry * moveSpeed
-            if (keys[K_RIGHT] and not keys[K_DOWN]) or (keys[K_LEFT] and keys[K_DOWN]):
-                # rotate to the right
-                # both camera direction and camera plane must be rotated
-                oldDirX = wm.camera.dirx
-                wm.camera.dirx = wm.camera.dirx * math.cos(- rotSpeed) - wm.camera.diry * math.sin(- rotSpeed)
-                wm.camera.diry = oldDirX * math.sin(- rotSpeed) + wm.camera.diry * math.cos(- rotSpeed)
-                oldPlaneX = wm.camera.planex
-                wm.camera.planex = wm.camera.planex * math.cos(- rotSpeed) - wm.camera.planey * math.sin(- rotSpeed)
-                wm.camera.planey = oldPlaneX * math.sin(- rotSpeed) + wm.camera.planey * math.cos(- rotSpeed)
-            if (keys[K_LEFT] and not keys[K_DOWN]) or (keys[K_RIGHT] and keys[K_DOWN]): 
-                # rotate to the left
-                # both camera direction and camera plane must be rotated
-                oldDirX = wm.camera.dirx
-                wm.camera.dirx = wm.camera.dirx * math.cos(rotSpeed) - wm.camera.diry * math.sin(rotSpeed)
-                wm.camera.diry = oldDirX * math.sin(rotSpeed) + wm.camera.diry * math.cos(rotSpeed)
-                oldPlaneX = wm.camera.planex
-                wm.camera.planex = wm.camera.planex * math.cos(rotSpeed) - wm.camera.planey * math.sin(rotSpeed)
-                wm.camera.planey = oldPlaneX * math.sin(rotSpeed) + wm.camera.planey * math.cos(rotSpeed)
-            
-        ##########################
-        # Cuadrado blanco:
-        ##########################
-        pygame.draw.rect(screen, Color('black'), WHITE_SQUARE)
-        if (gvars.get_init_whitebox()< 8):
-            pygame.draw.rect(screen, Color('black'), WHITE_SQUARE)
-            if (gvars.get_init_whitebox() == 2):
-                pygame.draw.rect(screen, Color('white'), WHITE_SQUARE)
-                pygame.display.flip()   #Update screen
-                pygame.time.delay(100)
-                strobe_value = 1
-                win_value = win_value_f
-            gvars.set_init_whitebox( gvars.get_init_whitebox()+1 )
-        
-        
-        ##########################
-        #pygame.display.update()
-        ##########################
-        if (initial_latency == 0):
-            pygame.display.flip()
+
+def movementSpeedCalculation():
+        # timing for input and FPS counter
+        frameTime = float(gvars.clock.get_time()) / 1000.0 # frameTime is the time this frame has taken, in seconds
+        #text = f.render(str(clock.get_fps()), False, (255, 255, 0))
+        #screen.blit(text, text.get_rect(), text.get_rect())
+        ###############################################
+        # speed modifiers (desplazamiento, rotación)
+        ###############################################
+        gvars.moveSpeed = frameTime * 10.2 # the constant value is in squares / second
+        gvars.rotSpeed = frameTime * 1.5 # the constant value is in radians / second
+
+def initJoystick():
+    # Initialize the joysticks
+    gvars.joystick_working = False
+    try:
+        pygame.joystick.init()
+        gvars.my_joystick = pygame.joystick.Joystick(0)
+        gvars.my_joystick.init()
+        gvars.joystick_working = True
+    except:
+        #log_to_file("Joystick incompatible o no encontrado.")
+        gvars.joystick_working = False
+    time.sleep(0.5)
+
+def initPygame():
+    pygame.mixer.init()
+    pygame.init()
+    pygame.display.set_caption("Laberinto Virtual - Hexágono v"+ (HEXAG_VERSION) )
+    
+    #size = w, h = 1600,900
+    gvars.size = gvars.width_screen, gvars.height_screen = 1366,768
+    
+    #window = pygame.display.set_mode(size)
+    pygame.display.set_mode(gvars.size, pygame.FULLSCREEN)
+    
+    
+    gvars.screen = pygame.display.get_surface()
+    #pixScreen = pygame.surfarray.pixels2d(screen)
+    pygame.mouse.set_visible(False)
+    gvars.clock = pygame.time.Clock()
+    time.sleep(0.5)
+
+def drawScoreBar():
+    #=======================================================================
+    # ##dibujo barra de puntaje
+    #=======================================================================
+    pygame.draw.rect(gvars.screen, (0,0,235), (50-5,gvars.height_screen/2-5-gvars.get_player_score(),15+10,gvars.get_player_score()+1+8), 0)
+    pygame.draw.rect(gvars.screen, (0,0,255), (50,gvars.height_screen/2-gvars.get_player_score(),15,gvars.get_player_score()+1), 0)
+    pass
+
+def log_frame():
         #=======================================================================
         # ## Log to file:
         #=======================================================================
+        #will only log during trial, after door opening and before trial starts again, no logging..
         
-        milis = (pygame.time.get_ticks())
-        
-        if (keep_log or strobe_value >0):
-            log_to_file("%d,%f,%f,%f,%f,%d,%d" % (milis, wm.camera.x, wm.camera.y, wm.camera.dirx, wm.camera.diry, strobe_value, win_value) )
-        #print (wm.camera.x), wm.camera.y
-        if (strobe_value == 1 and win_value == 0):
+        if (gvars.keep_log or gvars.strobe_value >0):
+            milis = (pygame.time.get_ticks())
+            log_to_file("%d,%f,%f,%f,%f,%d,%d" % (milis, gvars.wm.camera.x, gvars.wm.camera.y, gvars.wm.camera.dirx,
+                                                   gvars.wm.camera.diry, gvars.strobe_value, gvars.win_value) )
+        #print (gvars.wm.camera.x), gvars.wm.camera.y
+        if (gvars.strobe_value == 1 and gvars.win_value == 0):
             #empezar a logear
-            keep_log = True
-        elif (strobe_value ==1 and win_value >0):
-            keep_log = False
+            gvars.keep_log = True
+        elif (gvars.strobe_value ==1 and gvars.win_value >0):
+            gvars.keep_log = False
+        pass
 
 def add_score():
     #log_to_file("Sujeto GANA.")
