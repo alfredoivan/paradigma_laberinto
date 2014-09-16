@@ -33,6 +33,28 @@ vectorInstantaneo = vectorSimple.vectorSimple() #vector con el instantáneo de m
 class labyrinth_training():
     
     def __init__(self):
+        import Tkinter
+        import tkMessageBox
+        
+        top = Tkinter.Tk()
+        
+        def hexCallBack():
+            tkMessageBox.showinfo( "Selection:", "Hexagon selected")
+            gvars.lab_type = "hexag"
+            top.destroy()
+        
+        def tmCallBack():
+            tkMessageBox.showinfo( "Selection:", "T-Maze selected")
+            gvars.lab_type = "tmaze"
+            top.destroy()
+        
+        B = Tkinter.Button(top, text ="Hexagon", command = hexCallBack)
+        C = Tkinter.Button(top, text ="T-Maze", command = tmCallBack)
+        
+        B.pack()
+        C.pack()
+        top.mainloop()
+        
         if (gvars.lab_type == "hexag"):
             labyrinth_training.init_hexag_training();
         elif gvars.lab_type == "tmaze":
@@ -59,7 +81,7 @@ class labyrinth_training():
         gvars.win_value_f = 0 #se guarda en memoria si se gana o pierde, y se pone en log sólo cuando hay un strobe
         gvars.keep_log = False #true=logear este ciclo. Permite no logear los intersticios de
         #                       tiempo en donde ya se sabe que ganó y hasta el siguiente strobe de reinicio..
-        
+        gvars.screen = pygame.display.get_surface() #again, else tmaze will crash.
         pygame.time.delay(500)
         
         
@@ -107,6 +129,7 @@ class labyrinth_training():
             ##########################
             if (initial_frames_latency == 0):
                 pygame.display.flip()
+                pygame.time.delay(10)
             
             labyrinth_training.log_frame();
     
@@ -379,7 +402,7 @@ class labyrinth_training():
                 IMG_GREEN_FRACTAL = 16
         #gvars.wm = worldManager.WorldManager(gvars.worldMap,gvars.sprite_positions, 70, 11.5, -1, 0, 0, 1)
         gvars.wm = worldManager.WorldManager(gvars.worldMap,gvars.sprite_positions, 70, 11.5, -1, 0, 0, 1)
-        gvars.screen = pygame.display.get_surface()
+        
     
     @staticmethod
     def evalTmazeWin():
@@ -389,7 +412,8 @@ class labyrinth_training():
         if ( (LEFT_RECTANGLE.contains((gvars.wm.camera.x), (gvars.wm.camera.y))  ==True) and (gvars.get_experiment_ended() == False)) :
             #log_to_file("Sujeto ingresa a área IZQUIERDA.")
             pygame.draw.rect(gvars.screen, Color('white'), WHITE_SQUARE)
-            gvars.strobe_value = 1
+            #gvars.strobe_value = 1
+            
             if (gvars.get_anim_count( ) == 0):
                 if ((gvars.get_green_right() == 1 and gvars.get_color_experiment() == 0) or (gvars.get_green_right()==0 and gvars.get_color_experiment() == 1) ):
                     gvars.set_user_won(True)
@@ -397,35 +421,41 @@ class labyrinth_training():
                     #log_to_file("Fin experimento.")
                     gvars.set_anim_count(1)
                     gvars.win_value = 2
+                    gvars.set_init_whitebox(0)
                 else:
                     #log_to_file("Sujeto PIERDE.")
                     #log_to_file("Fin experimento.")
                     gvars.win_value = 1
                     gvars.set_user_won(False)
                     gvars.set_anim_count(71)
+                    gvars.set_init_whitebox(0)
         
         
         if ( ( RIGHT_RECTANGLE.contains((gvars.wm.camera.x), (gvars.wm.camera.y)) ==True)  and (gvars.get_experiment_ended() == False) ):
             #log_to_file("Sujeto ingresa a área DERECHA.")
             pygame.draw.rect(gvars.screen, Color('white'), WHITE_SQUARE)
-            gvars.strobe_value = 1
-
+            #gvars.strobe_value = 1
+            
+            
             if (gvars.get_anim_count( ) == 0):
                 if ((gvars.get_green_right() == 1 and gvars.get_color_experiment() == 1) or (gvars.get_green_right() == 0 and gvars.get_color_experiment() == 0) ):
                     gvars.set_user_won(True)
                     gvars.set_anim_count(1)
                     labyrinth_training.add_score()
                     gvars.win_value = 2
+                    gvars.set_init_whitebox(0)
                 else:
                     #log_to_file("Sujeto PIERDE.")
                     gvars.win_value = 1
                     gvars.set_user_won(False)
                     gvars.set_anim_count(71)
+                    gvars.set_init_whitebox(0)
         
         if (gvars.wm.camera.x < 36 and gvars.get_lights_on() == False):
             #log_to_file("Se encienden señales de COMPARISSON")
             pygame.draw.rect(gvars.screen, Color('white'), WHITE_SQUARE)
-            gvars.strobe_value = 1
+            gvars.set_init_whitebox(0)
+            #gvars.strobe_value = 1
             gvars.set_lights_on( True )
             if (gvars.get_green_right() == 0 and gvars.get_color_experiment() == 1):
                     gvars.sprite_positions=[
@@ -467,7 +497,8 @@ class labyrinth_training():
                     gvars.set_light_sample(True)
                     #log_to_file("Se encienden señales de SAMPLE")
                     pygame.draw.rect(gvars.screen, Color('white'), WHITE_SQUARE)
-                    gvars.strobe_value = 1
+                    #gvars.strobe_value = 1
+                    gvars.set_init_whitebox(0)
                     gvars.set_color_experiment ( randint(0,99) )
                     #determino si el color que debe seguir el usuario es el rojo o verde
                     #color_experiment = 1 significa VERDE
@@ -766,55 +797,63 @@ class labyrinth_training():
         ##########################
         pygame.draw.rect(gvars.screen, Color('black'), WHITE_SQUARE)
         if (gvars.get_init_whitebox()< 8):
-            pygame.draw.rect(gvars.screen, Color('black'), WHITE_SQUARE)
             if (gvars.get_init_whitebox() == 2):
                 pygame.draw.rect(gvars.screen, Color('white'), WHITE_SQUARE)
-                pygame.display.flip()   #Update screen
-                pygame.time.delay(100)
                 gvars.strobe_value = 1
+                pygame.display.update(WHITE_SQUARE)
+                pygame.time.delay(100)
+                pygame.draw.rect(gvars.screen, Color('black'), WHITE_SQUARE)
+                #pygame.display.flip()   #Update screen
                 gvars.win_value = gvars.win_value_f
             gvars.set_init_whitebox( gvars.get_init_whitebox()+1 )
         pass
     
     @staticmethod
     def keyboardInput():
-        
+            if (gvars.strobe_value == 1):
+                return;
             #=======================================================================
             # # Entradas de Teclado.
             #=======================================================================
             if (gvars.get_delay_reboot_button() > 0):
-                gvars.set_delay_reboot_button(gvars.get_delay_reboot_button()+1)
+                gvars.set_delay_reboot_button(gvars.get_delay_reboot_button() + 1)
                 
             if (gvars.get_delay_reboot_button() == 12):
                 gvars.set_delay_reboot_button(0)
             if (gvars.get_door_anim() == 0 and gvars.keep_log == True):
                 keys = pygame.key.get_pressed()
                 if keys[K_SPACE]:
-                    #Forzar Reinicio: como si hubiera ganado o perdido.
-                    if (gvars.get_delay_reboot_button() ==0):
+                    # Forzar Reinicio: como si hubiera ganado o perdido.
+                    if (gvars.get_delay_reboot_button() == 0):
                         gvars.set_delay_reboot_button(1)
                         gvars.set_anim_count (61)
                 ###############
                 # Desplazarse con UP DOWN LEFT RIGHT
                 if keys[K_UP]:
                     # move forward if no wall in front of you
-                    moveX = gvars.wm.camera.x + gvars.wm.camera.dirx * gvars.moveSpeed
-                    if(gvars.worldMap[int(moveX)][int(gvars.wm.camera.y)]==0 and gvars.worldMap[int(moveX + 0.1)][int(gvars.wm.camera.y)]==0):gvars.wm.camera.x += gvars.wm.camera.dirx * gvars.moveSpeed
-                    moveY = gvars.wm.camera.y + gvars.wm.camera.diry * gvars.moveSpeed
-                    if(gvars.worldMap[int(gvars.wm.camera.x)][int(moveY)]==0 and gvars.worldMap[int(gvars.wm.camera.x)][int(moveY + 0.1)]==0):gvars.wm.camera.y += gvars.wm.camera.diry * gvars.moveSpeed
+                    try:
+                        moveX = gvars.wm.camera.x + gvars.wm.camera.dirx * gvars.moveSpeed
+                        if(gvars.worldMap[int(moveX)][int(gvars.wm.camera.y)] == 0 and gvars.worldMap[int(moveX + 0.1)][int(gvars.wm.camera.y)] == 0):gvars.wm.camera.x += gvars.wm.camera.dirx * gvars.moveSpeed
+                        moveY = gvars.wm.camera.y + gvars.wm.camera.diry * gvars.moveSpeed
+                        if(gvars.worldMap[int(gvars.wm.camera.x)][int(moveY)] == 0 and gvars.worldMap[int(gvars.wm.camera.x)][int(moveY + 0.1)] == 0):gvars.wm.camera.y += gvars.wm.camera.diry * gvars.moveSpeed
+                    except:
+                        pass
                 if keys[K_DOWN]:
                     # move backwards if no wall behind you
-                    if(gvars.worldMap[int(gvars.wm.camera.x - gvars.wm.camera.dirx * gvars.moveSpeed)][int(gvars.wm.camera.y)] == 0):gvars.wm.camera.x -= gvars.wm.camera.dirx * gvars.moveSpeed
-                    if(gvars.worldMap[int(gvars.wm.camera.x)][int(gvars.wm.camera.y - gvars.wm.camera.diry * gvars.moveSpeed)] == 0):gvars.wm.camera.y -= gvars.wm.camera.diry * gvars.moveSpeed
+                    try:
+                        if(gvars.worldMap[int(gvars.wm.camera.x - gvars.wm.camera.dirx * gvars.moveSpeed)][int(gvars.wm.camera.y)] == 0):gvars.wm.camera.x -= gvars.wm.camera.dirx * gvars.moveSpeed
+                        if(gvars.worldMap[int(gvars.wm.camera.x)][int(gvars.wm.camera.y - gvars.wm.camera.diry * gvars.moveSpeed)] == 0):gvars.wm.camera.y -= gvars.wm.camera.diry * gvars.moveSpeed
+                    except:
+                        pass
                 if (keys[K_RIGHT] and not keys[K_DOWN]) or (keys[K_LEFT] and keys[K_DOWN]):
                     # rotate to the right
                     # both camera direction and camera plane must be rotated
                     oldDirX = gvars.wm.camera.dirx
-                    gvars.wm.camera.dirx = gvars.wm.camera.dirx * math.cos(- gvars.rotSpeed) - gvars.wm.camera.diry * math.sin(- gvars.rotSpeed)
-                    gvars.wm.camera.diry = oldDirX * math.sin(- gvars.rotSpeed) + gvars.wm.camera.diry * math.cos(- gvars.rotSpeed)
+                    gvars.wm.camera.dirx = gvars.wm.camera.dirx * math.cos(-gvars.rotSpeed) - gvars.wm.camera.diry * math.sin(-gvars.rotSpeed)
+                    gvars.wm.camera.diry = oldDirX * math.sin(-gvars.rotSpeed) + gvars.wm.camera.diry * math.cos(-gvars.rotSpeed)
                     oldPlaneX = gvars.wm.camera.planex
-                    gvars.wm.camera.planex = gvars.wm.camera.planex * math.cos(- gvars.rotSpeed) - gvars.wm.camera.planey * math.sin(- gvars.rotSpeed)
-                    gvars.wm.camera.planey = oldPlaneX * math.sin(- gvars.rotSpeed) + gvars.wm.camera.planey * math.cos(- gvars.rotSpeed)
+                    gvars.wm.camera.planex = gvars.wm.camera.planex * math.cos(-gvars.rotSpeed) - gvars.wm.camera.planey * math.sin(-gvars.rotSpeed)
+                    gvars.wm.camera.planey = oldPlaneX * math.sin(-gvars.rotSpeed) + gvars.wm.camera.planey * math.cos(-gvars.rotSpeed)
                 if (keys[K_LEFT] and not keys[K_DOWN]) or (keys[K_RIGHT] and keys[K_DOWN]): 
                     # rotate to the left
                     # both camera direction and camera plane must be rotated
@@ -829,9 +868,12 @@ class labyrinth_training():
     
     @staticmethod
     def joystickInput():
+            if (gvars.strobe_value == 1):
+                return;
             ############################################
             # Toma de datos de Joystick
             ############################################
+            pass
             #x e y
             
             x=0
