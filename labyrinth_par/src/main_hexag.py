@@ -11,15 +11,20 @@ import time
 import signal
 import sys
 import os
+from rect_cl import Rectangle  # @UnresolvedImport
 
 gvars = vars_tmaze.vars_tmaze() #variables del juego a ser accedidas "globalmente"
 
-HEXAG_VERSION = "1.3.1"
+PROGRAM_VERSION = "1.3.1"
 CYCLE_LOOP_NUMBER = 2 #cantidad de ciclos que deben pasar para que se ejecuten los movimientos en el mapa 3D
 IMG_WIN_MONEY = pygame.image.load('pics/items/money.png')
 IMG_LOSE_SADFACE = pygame.image.load('pics/items/sadface.gif')
 #FPS = 8
 WHITE_SQUARE = Rect(0, 0, 100, 100)
+IMG_RED_FRACTAL = 16 #index de la matriz en worldManager.
+IMG_GREEN_FRACTAL = 17 #index..
+LEFT_RECTANGLE = Rectangle(0,8,0,4)
+RIGHT_RECTANGLE = Rectangle(0,8,19,999)
 
 vectorInstantaneo = vectorSimple.vectorSimple() #vector con el instantáneo de movimiento, x e y dependen del estado de joystick.
 
@@ -28,7 +33,10 @@ vectorInstantaneo = vectorSimple.vectorSimple() #vector con el instantáneo de m
 class labyrinth_training():
     
     def __init__(self):
-        labyrinth_training.init_hexag_training();
+        if (gvars.lab_type == "hexag"):
+            labyrinth_training.init_hexag_training();
+        elif gvars.lab_type == "tmaze":
+            labyrinth_training.init_tmaze_training();
     
     @staticmethod
     def mainFunction():
@@ -36,7 +44,10 @@ class labyrinth_training():
         
         labyrinth_training.initJoystick()
         
-        labyrinth_training.initHexagMaze()
+        if gvars.lab_type == "hexag":
+            labyrinth_training.initHexagMaze()
+        elif gvars.lab_type == "tmaze":
+            labyrinth_training.initTMazeMaze()
         
         
         initial_frames_latency = 7 #7 latency frames to smooth the initialization.
@@ -51,9 +62,12 @@ class labyrinth_training():
         
         pygame.time.delay(500)
         
+        
         while(True):
             if (initial_frames_latency > 0):
                 initial_frames_latency -= 1
+            
+            
             
             gvars.wm.draw(gvars.screen)
             gvars.clock.tick(60)
@@ -62,15 +76,24 @@ class labyrinth_training():
             
             labyrinth_training.drawScoreBar();
             
-            labyrinth_training.evalHexagWin()
+            if gvars.lab_type == "hexag":
+                labyrinth_training.evalHexagWin()
+            elif gvars.lab_type == "tmaze":
+                labyrinth_training.evalTmazeWin()
             
             labyrinth_training.movementSpeedCalculation()
             
-            labyrinth_training.hexagDoorAnimations()
+            if gvars.lab_type == "hexag":
+                labyrinth_training.hexagDoorAnimations()
+            elif gvars.lab_type == "tmaze":
+                labyrinth_training.tmazeWLAnimations()
+            
+            
             
             labyrinth_training.joystickInput()
             
-            labyrinth_training.analyzeHexagCollisions()
+            if gvars.lab_type == "hexag":
+                labyrinth_training.analyzeHexagCollisions()
             
             labyrinth_training.pyEventsHandle()
             
@@ -86,6 +109,221 @@ class labyrinth_training():
                 pygame.display.flip()
             
             labyrinth_training.log_frame();
+    
+    @staticmethod
+    def init_hexag_training():
+        def init_worldmap_hexag():
+            gvars.worldMap=[
+              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
+              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
+              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
+              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
+              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
+              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
+              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,2,0,0,0,2,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
+              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
+              [4,0,0,4,0,4,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,4,4,4,0,0,4],
+              [4,0,4,0,0,0,4,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,4,4,0,0,4,0,4],
+              [4,4,0,0,0,0,0,4,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,4,4,0,0,0,0,4,4],
+              [4,0,4,0,0,0,0,0,4,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,4,4,0,0,0,0,0,4,4],
+              [4,0,0,4,0,0,0,0,0,4,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,4,4,0,0,0,0,0,4,4,4],
+              [4,0,0,0,4,0,0,0,0,0,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,0,0,0,0,0,4,4,0,4],
+              [4,0,0,4,0,4,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,4,4,0,0,4],
+              [4,0,0,0,4,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,4],
+              [4,0,0,0,0,4,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,4],
+              [4,0,0,0,0,0,4,4,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,4,4,0,0,0,0,4],
+              [4,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,4],
+              [4,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,4],
+              [4,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,4],
+              [4,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,4],
+              [4,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4],
+              [4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4],
+              [4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4],
+              [4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4],
+              [4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4],
+              [4,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4],
+              [4,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,4],
+              [4,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,4,4],
+              [4,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,4,4],
+              [4,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,4],
+              [4,0,0,0,0,0,4,4,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,4,0,0,0,0,0,4],
+              [4,0,0,0,0,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,4],
+              [4,0,0,0,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,4],
+              [4,0,0,4,4,4,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,4,4,0,0,4],
+              [4,0,4,4,4,0,0,0,0,0,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,0,0,0,0,0,4,4,0,4],
+              [4,4,0,4,0,0,0,0,0,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,4,4,0,0,0,0,0,4,4,4],
+              [4,0,4,0,0,0,0,0,4,4,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,4,4,0,0,0,0,0,4,4],
+              [4,4,0,0,0,0,0,4,4,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,4,4,0,0,0,0,4,4],
+              [4,0,4,0,0,0,4,4,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,4,4,0,0,4,0,4],
+              [4,0,0,4,0,4,4,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,4,4,4,0,0,4],
+              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
+              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,2,0,0,0,2,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
+              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
+              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
+              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
+              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
+              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
+              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4]
+            ];
+            
+            gvars.sprite_positions=[
+                        (25.07466, 50.187876, 4), #círculo
+                        (42.308263, 20.924262, 5),  #cuadrado
+                        (7.947716, 20.924262, 6), #triángulo
+                        (12.787, 47.724, 7), (12.1535  , 47.01, 7), (11.520  , 46.326, 7), (12.1535  , 47.025, 7), #puerta 1, circ.izq.
+                        (3.275 , 25.2751, 7),( 3.277 , 25.8751, 7),  (3.2796 , 26.6061, 7), (3.2896 , 27.2061, 7),  (3.3097, 27.937, 7),#triang.der.
+                        (11.8644, 4.1717, 7), (11.4644, 4.7717, 7), (11.0158  , 5.1, 7), (11.0158 , 5.1344, 7), (10.6158 , 5.8344, 7), (10.1672 , 6.097, 7),#triang.izq.
+                        (39.7025, 5.7654, 7),  (39.3078 , 5.1215, 7),(38.9078 , 4.8715, 7),(38.6078 , 4.3715, 7), (38.1130 , 3.9775, 7), #cuad.der.
+                        (47.4633 , 27.6493, 7), (47.4333 , 27.0493, 7),  (47.41795 , 26.33015, 7), (47.39595 , 25.73015, 7), (47.3726, 25.0110, 7), #cuad.izq.
+                        (37.1405 , 47.7401, 7), (37.4605 , 47.3401, 7), (37.95235 , 46.89345, 7), (38.35235 , 46.45345, 7),  (38.7642, 46.0468, 7),   #puerta 6, circ.der.
+                        (0.01 , 0.01, 14) #sprite recompensa, se reposiciona al elegir puerta
+            ];
+            pass
+        
+        
+        pass
+        #inicializo algunas variables...
+        
+        gvars.set_log_to_file_counter( 0 )
+        gvars.log_to_file_matrix = []
+        init_worldmap_hexag();
+        #####################################
+        #inicializo log y declaro el archivo.
+        #####################################
+        subject_name = str(raw_input("Ingrese nombre de sujeto: "))
+        gvars.set_log_file(subject_name)
+        from time import strftime, localtime
+        cad_temp = strftime("%Y%m%d", localtime())
+        #cad_temp = strftime("%Y%m%d %H_%M_%S", localtime())
+        file_count_1 = 0
+        for i in range(0,999):
+            if os.path.isfile("logs/"+gvars.get_log_file()+" "+"%s_hexag_%d.csv"%(cad_temp, i)):
+                file_count_1 +=1
+               
+        print file_count_1 #cantidad de archivos de log que existen de mismo experimento y sujeto en el día actual.
+        cad_temp = "logs/"+gvars.get_log_file()+" "+"%s_hexag_%d.csv"%(cad_temp, file_count_1)
+        #cad_temp = str('%s log_file.txt' % datetime.datetime.isoformat('_') ) 
+        gvars.set_log_file( open(cad_temp,'a') )
+        labyrinth_training.log_to_file("TIME,X,Y,DIRX,DIRY,STROBE,WIN")
+        #####################################
+        #main thread.
+        #####################################
+        import threading
+        mainThread = threading.Thread(target=labyrinth_training.mainFunction)
+        mainThread.start()
+    
+    @staticmethod
+    def init_tmaze_training():
+        def init_worldmap_tmaze():
+            gvars.worldMap=[
+              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
+              [4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4],
+              [4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4],
+              [4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4],
+              [4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4],
+              [4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4],
+              [4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4],
+              [4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4],
+              [4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,4,4,4,4,4,4,4],
+              [4,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,8],
+              [4,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,8],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4],
+              [4,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,4],
+              [4,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,4],
+              [4,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,4],
+              [4,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,4],
+              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4]
+            ];
+            
+            gvars.sprite_positions=[(25.07466, 50.187876, 4)  ];
+            pass
+        
+        
+        pass
+        #inicializo algunas variables...
+        
+        gvars.set_log_to_file_counter( 0 )
+        gvars.log_to_file_matrix = []
+        init_worldmap_tmaze();
+        #####################################
+        #inicializo log y declaro el archivo.
+        #####################################
+        subject_name = str(raw_input("Ingrese nombre de sujeto: "))
+        gvars.set_log_file(subject_name)
+        from time import strftime, localtime
+        cad_temp = strftime("%Y%m%d", localtime())
+        #cad_temp = strftime("%Y%m%d %H_%M_%S", localtime())
+        file_count_1 = 0
+        for i in range(0,999):
+            if os.path.isfile("logs/"+gvars.get_log_file()+" "+"%s_tmaze_%d.csv"%(cad_temp, i)):
+                file_count_1 +=1
+               
+        print file_count_1 #cantidad de archivos de log que existen de mismo experimento y sujeto en el día actual.
+        cad_temp = "logs/"+gvars.get_log_file()+" "+"%s_tmaze_%d.csv"%(cad_temp, file_count_1)
+        #cad_temp = str('%s log_file.txt' % datetime.datetime.isoformat('_') ) 
+        gvars.set_log_file( open(cad_temp,'a') )
+        labyrinth_training.log_to_file("TIME,X,Y,DIRX,DIRY,STROBE,WIN")
+        #####################################
+        #main thread.
+        #####################################
+        import threading
+        mainThread = threading.Thread(target=labyrinth_training.mainFunction)
+        mainThread.start()
     
     @staticmethod
     def initHexagMaze():
@@ -126,6 +364,164 @@ class labyrinth_training():
         ###
         gvars.wm = worldManager.WorldManager(gvars.worldMap,gvars.sprite_positions, 25, 25.5, -1, 0, 0, 1)
         
+    
+    @staticmethod
+    def initTMazeMaze():
+        a= randint(0,99)
+        global IMG_RED_FRACTAL
+        global IMG_GREEN_FRACTAL
+        if (a > 50):
+                
+                IMG_RED_FRACTAL = 16
+                IMG_GREEN_FRACTAL = 17
+        else:
+                IMG_RED_FRACTAL = 17
+                IMG_GREEN_FRACTAL = 16
+        #gvars.wm = worldManager.WorldManager(gvars.worldMap,gvars.sprite_positions, 70, 11.5, -1, 0, 0, 1)
+        gvars.wm = worldManager.WorldManager(gvars.worldMap,gvars.sprite_positions, 70, 11.5, -1, 0, 0, 1)
+        gvars.screen = pygame.display.get_surface()
+    
+    @staticmethod
+    def evalTmazeWin():
+        #=======================================================================
+        # #Análisis áreas del juego: región donde activa luces, región de ganar / perder..
+        #=======================================================================
+        if ( (LEFT_RECTANGLE.contains((gvars.wm.camera.x), (gvars.wm.camera.y))  ==True) and (gvars.get_experiment_ended() == False)) :
+            #log_to_file("Sujeto ingresa a área IZQUIERDA.")
+            pygame.draw.rect(gvars.screen, Color('white'), WHITE_SQUARE)
+            gvars.strobe_value = 1
+            if (gvars.get_anim_count( ) == 0):
+                if ((gvars.get_green_right() == 1 and gvars.get_color_experiment() == 0) or (gvars.get_green_right()==0 and gvars.get_color_experiment() == 1) ):
+                    gvars.set_user_won(True)
+                    labyrinth_training.add_score()
+                    #log_to_file("Fin experimento.")
+                    gvars.set_anim_count(1)
+                    gvars.win_value = 2
+                else:
+                    #log_to_file("Sujeto PIERDE.")
+                    #log_to_file("Fin experimento.")
+                    gvars.win_value = 1
+                    gvars.set_user_won(False)
+                    gvars.set_anim_count(71)
+        
+        
+        if ( ( RIGHT_RECTANGLE.contains((gvars.wm.camera.x), (gvars.wm.camera.y)) ==True)  and (gvars.get_experiment_ended() == False) ):
+            #log_to_file("Sujeto ingresa a área DERECHA.")
+            pygame.draw.rect(gvars.screen, Color('white'), WHITE_SQUARE)
+            gvars.strobe_value = 1
+
+            if (gvars.get_anim_count( ) == 0):
+                if ((gvars.get_green_right() == 1 and gvars.get_color_experiment() == 1) or (gvars.get_green_right() == 0 and gvars.get_color_experiment() == 0) ):
+                    gvars.set_user_won(True)
+                    gvars.set_anim_count(1)
+                    labyrinth_training.add_score()
+                    gvars.win_value = 2
+                else:
+                    #log_to_file("Sujeto PIERDE.")
+                    gvars.win_value = 1
+                    gvars.set_user_won(False)
+                    gvars.set_anim_count(71)
+        
+        if (gvars.wm.camera.x < 36 and gvars.get_lights_on() == False):
+            #log_to_file("Se encienden señales de COMPARISSON")
+            pygame.draw.rect(gvars.screen, Color('white'), WHITE_SQUARE)
+            gvars.strobe_value = 1
+            gvars.set_lights_on( True )
+            if (gvars.get_green_right() == 0 and gvars.get_color_experiment() == 1):
+                    gvars.sprite_positions=[
+                      #Tres luces: Sample, y las dos para comparisson
+                      #(9.5, 7.3, IMG_GREEN_FRACTAL), #comparisson izquierda
+                      #(9.5, 16.7, IMG_RED_FRACTAL), #comparisson derecha
+                      (9.5, 7.9, IMG_GREEN_FRACTAL), #comparisson izquierda
+                      (9.5, 16.1, IMG_RED_FRACTAL), #comparisson derecha
+                      #(40, 16.7, 2), #sample
+                    ]
+            if (gvars.get_green_right() == 1 and gvars.get_color_experiment() == 1):
+                    gvars.sprite_positions=[
+                      #Tres luces: Sample, y las dos para comparisson
+                      (9.5, 7.9, IMG_RED_FRACTAL), #comparisson izquierda
+                      (9.5, 16.1, IMG_GREEN_FRACTAL), #comparisson derecha
+                      #(40, 16.7, 2), #sample
+                    ]
+            if (gvars.get_green_right() == 0 and gvars.get_color_experiment() == 0):
+                    gvars.sprite_positions=[
+                      #Tres luces: Sample, y las dos para comparisson
+                      (9.5, 7.9, IMG_GREEN_FRACTAL), #comparisson izquierda
+                      (9.5, 16.1, IMG_RED_FRACTAL), #comparisson derecha
+                      #(40, 16.7, 3), #sample
+                    ]
+            if (gvars.get_green_right() == 1 and gvars.get_color_experiment() == 0):
+                    gvars.sprite_positions=[
+                      #Tres luces: Sample, y las dos para comparisson
+                      (9.5, 7.9, IMG_RED_FRACTAL), #comparisson izquierda
+                      (9.5, 16.1, IMG_GREEN_FRACTAL), #comparisson derecha
+                      #(40, 16.7, 3), #sample
+                    ]
+            gvars.wm = worldManager.WorldManager(gvars.worldMap,gvars.sprite_positions, gvars.wm.camera.x, 
+                                                 gvars.wm.camera.y, gvars.wm.camera.dirx, gvars.wm.camera.diry, 0, 1)
+            
+        #=======================================================================
+        # #Se enciende luz de SAMPLE
+        #=======================================================================
+        if (gvars.wm.camera.x < 57 and gvars.get_light_sample() == False):
+                    gvars.set_light_sample(True)
+                    #log_to_file("Se encienden señales de SAMPLE")
+                    pygame.draw.rect(gvars.screen, Color('white'), WHITE_SQUARE)
+                    gvars.strobe_value = 1
+                    gvars.set_color_experiment ( randint(0,99) )
+                    #determino si el color que debe seguir el usuario es el rojo o verde
+                    #color_experiment = 1 significa VERDE
+                    #color_experiment = 0 significa ROJO
+                    #green_right = 0 significa SEÑAL VERDE EN LADO IZQUIERDO
+                    #green_right = 1 significa SEÑAL VERDE EN LADO DERECHO
+                    if (gvars.get_color_experiment() > 49):
+                        gvars.set_color_experiment ( 1 ) #GREEN
+                        #log_to_file("Color a seguir en el laberinto: VERDE")
+                    else:
+                        gvars.set_color_experiment ( 0 ) #RED
+                        #log_to_file("Color a seguir en el laberinto: ROJO")
+                                    
+                    #se establece otro número aleatorio para la posición de los colores. Rojo izq, verde der, o al revés:
+                    gvars.set_green_right( randint(0,99) )
+                    if (gvars.get_green_right() > 49):
+                        gvars.set_green_right( 1 ) #GREEN derecha
+                        #log_to_file("Posición del color verde: DERECHA")
+                        #log_to_file("Posición del color rojo: IZQUIERDA")
+                    else:
+                        gvars.set_green_right( 0 ) #GREEN izquierda
+                        #log_to_file("Posición del color verde: IZQUIERDA")
+                        #log_to_file("Posición del color rojo: DERECHA")
+                    if (gvars.get_green_right() == 0 and gvars.get_color_experiment() == 1):
+                            gvars.sprite_positions=[
+                              #Tres luces: Sample, y las dos para comparisson
+                              #(9.5, 7.3, 2), #comparisson izquierda
+                              #(9.5, 16.7, 3), #comparisson derecha
+                              (40, 16.7, 2), #sample
+                            ]
+                    if (gvars.get_green_right() == 1 and gvars.get_color_experiment() == 1):
+                            gvars.sprite_positions=[
+                              #Tres luces: Sample, y las dos para comparisson
+                              #(9.5, 7.3, 3), #comparisson izquierda
+                              #(9.5, 16.7, 2), #comparisson derecha
+                              (40, 16.7, 2), #sample
+                            ]
+                    if (gvars.get_green_right() == 0 and gvars.get_color_experiment() == 0):
+                            gvars.sprite_positions=[
+                              #Tres luces: Sample, y las dos para comparisson
+                              #(9.5, 7.3, 2), #comparisson izquierda
+                              #(9.5, 16.7, 3), #comparisson derecha
+                              (40, 16.7, 3), #sample
+                            ]
+                    if (gvars.get_green_right() == 1 and gvars.get_color_experiment() == 0):
+                            gvars.sprite_positions=[
+                              #Tres luces: Sample, y las dos para comparisson
+                              #(9.5, 7.3, 3), #comparisson izquierda
+                              #(9.5, 16.7, 2), #comparisson derecha
+                              (40, 16.7, 3), #sample
+                            ]
+                    gvars.wm = worldManager.WorldManager(gvars.worldMap,gvars.sprite_positions, gvars.wm.camera.x, gvars.wm.camera.y,
+                                                          gvars.wm.camera.dirx, gvars.wm.camera.diry, 0, 1) 
+            
     
     @staticmethod
     def evalHexagWin():
@@ -225,6 +621,35 @@ class labyrinth_training():
                             gvars.sprite_positions[i] = (gvars.get_posx_to_set(), gvars.get_posy_to_set(), 14)
             
             pass
+    
+    @staticmethod
+    def tmazeWLAnimations():
+        #=======================================================================
+        # # Animación de ganaste / perdiste:
+        #=======================================================================
+        if (gvars.get_anim_count() >0 and gvars.get_anim_count() < 60):
+                vars_tmaze.blit_alpha(gvars.screen, IMG_WIN_MONEY, (gvars.width_screen/2 -250,0), 255-gvars.get_anim_count()*4)
+                gvars.set_anim_count(gvars.get_anim_count()+5)
+        if (gvars.get_anim_count() >70 and gvars.get_anim_count() < 130):
+                vars_tmaze.blit_alpha(gvars.screen, IMG_LOSE_SADFACE, (gvars.width_screen/2 -250,0), 255-(gvars.get_anim_count()-70)*4)
+                gvars.set_anim_count(gvars.get_anim_count()+5)
+        if (gvars.get_anim_count() == 61 or gvars.get_anim_count() == 131):
+            gvars.set_anim_count(0)
+            gvars.set_experiment_ended(True)
+        
+        
+        if (  (gvars.get_experiment_ended() == True) and (gvars.get_anim_count() == 0) ):
+            #comienza animación
+            #log_to_file("Reinicio de experimento.")
+            gvars.set_delay_reboot_button(1)
+            gvars.set_init_whitebox(0) #para que en breve ponga la luz blanca.
+            gvars.set_user_won(False)
+            gvars.set_experiment_ended(False)
+            gvars.set_lights_on ( False )
+            gvars.set_light_sample(False)
+            gvars.sprite_positions=[]
+            gvars.wm = worldManager.WorldManager(gvars.worldMap,gvars.sprite_positions, 70, 11.5, -1, 0, 0, 1)
+            time.sleep(0.1)
     
     @staticmethod
     def analyzeHexagCollisions():
@@ -337,7 +762,7 @@ class labyrinth_training():
     @staticmethod
     def evalWhiteSquare():
         ##########################
-        # Cuadrado blanco:
+        # Cuadrado blanco: se evalúa si dibujarlo o dibujar un cuadrado negro.
         ##########################
         pygame.draw.rect(gvars.screen, Color('black'), WHITE_SQUARE)
         if (gvars.get_init_whitebox()< 8):
@@ -519,7 +944,11 @@ class labyrinth_training():
     def initPygame():
         pygame.mixer.init()
         pygame.init()
-        pygame.display.set_caption("Laberinto Virtual - Hexágono v"+ (HEXAG_VERSION) )
+        if gvars.lab_type == "hexag":
+            st = "Hexágono";
+        else:
+            st = "T-Maze"
+        pygame.display.set_caption("Laberinto Virtual - %s v%s"% (st , str(PROGRAM_VERSION)) )
         
         #size = w, h = 1600,900
         gvars.size = gvars.width_screen, gvars.height_screen = 1366,768
@@ -604,105 +1033,6 @@ class labyrinth_training():
             ret.append(s)
         return ret
      
-    @staticmethod
-    def init_hexag_training():
-        def init_worldmap():
-            gvars.worldMap=[
-              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,2,0,0,0,2,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-              [4,0,0,4,0,4,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,4,4,4,0,0,4],
-              [4,0,4,0,0,0,4,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,4,4,0,0,4,0,4],
-              [4,4,0,0,0,0,0,4,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,4,4,0,0,0,0,4,4],
-              [4,0,4,0,0,0,0,0,4,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,4,4,0,0,0,0,0,4,4],
-              [4,0,0,4,0,0,0,0,0,4,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,4,4,0,0,0,0,0,4,4,4],
-              [4,0,0,0,4,0,0,0,0,0,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,0,0,0,0,0,4,4,0,4],
-              [4,0,0,4,0,4,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,4,4,0,0,4],
-              [4,0,0,0,4,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,4],
-              [4,0,0,0,0,4,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,4],
-              [4,0,0,0,0,0,4,4,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,4,4,0,0,0,0,4],
-              [4,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,4],
-              [4,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,4],
-              [4,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,4],
-              [4,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,4],
-              [4,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4],
-              [4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4],
-              [4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4],
-              [4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4],
-              [4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4],
-              [4,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4],
-              [4,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,4],
-              [4,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,4,4],
-              [4,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,4,4],
-              [4,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,4],
-              [4,0,0,0,0,0,4,4,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,4,0,0,0,0,0,4],
-              [4,0,0,0,0,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,4],
-              [4,0,0,0,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,4],
-              [4,0,0,4,4,4,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,4,4,0,0,4],
-              [4,0,4,4,4,0,0,0,0,0,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,0,0,0,0,0,4,4,0,4],
-              [4,4,0,4,0,0,0,0,0,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,4,4,0,0,0,0,0,4,4,4],
-              [4,0,4,0,0,0,0,0,4,4,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,4,4,0,0,0,0,0,4,4],
-              [4,4,0,0,0,0,0,4,4,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,4,4,0,0,0,0,4,4],
-              [4,0,4,0,0,0,4,4,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,4,4,0,0,4,0,4],
-              [4,0,0,4,0,4,4,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,4,4,4,0,0,4],
-              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,2,0,0,0,2,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,0,0,0,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-              [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4]
-            ];
-            
-            gvars.sprite_positions=[
-                        (25.07466, 50.187876, 4), #círculo
-                        (42.308263, 20.924262, 5),  #cuadrado
-                        (7.947716, 20.924262, 6), #triángulo
-                        (12.787, 47.724, 7), (12.1535  , 47.01, 7), (11.520  , 46.326, 7), (12.1535  , 47.025, 7), #puerta 1, circ.izq.
-                        (3.275 , 25.2751, 7),( 3.277 , 25.8751, 7),  (3.2796 , 26.6061, 7), (3.2896 , 27.2061, 7),  (3.3097, 27.937, 7),#triang.der.
-                        (11.8644, 4.1717, 7), (11.4644, 4.7717, 7), (11.0158  , 5.1, 7), (11.0158 , 5.1344, 7), (10.6158 , 5.8344, 7), (10.1672 , 6.097, 7),#triang.izq.
-                        (39.7025, 5.7654, 7),  (39.3078 , 5.1215, 7),(38.9078 , 4.8715, 7),(38.6078 , 4.3715, 7), (38.1130 , 3.9775, 7), #cuad.der.
-                        (47.4633 , 27.6493, 7), (47.4333 , 27.0493, 7),  (47.41795 , 26.33015, 7), (47.39595 , 25.73015, 7), (47.3726, 25.0110, 7), #cuad.izq.
-                        (37.1405 , 47.7401, 7), (37.4605 , 47.3401, 7), (37.95235 , 46.89345, 7), (38.35235 , 46.45345, 7),  (38.7642, 46.0468, 7),   #puerta 6, circ.der.
-                        (0.01 , 0.01, 14) #sprite recompensa, se reposiciona al elegir puerta
-            ];
-            pass
-        #inicializo algunas variables...
-        
-        gvars.set_log_to_file_counter( 0 )
-        gvars.log_to_file_matrix = []
-        init_worldmap();
-        #####################################
-        #inicializo log y declaro el archivo.
-        #####################################
-        subject_name = str(raw_input("Ingrese nombre de sujeto: "))
-        gvars.set_log_file(subject_name)
-        from time import strftime, localtime
-        cad_temp = strftime("%Y%m%d", localtime())
-        #cad_temp = strftime("%Y%m%d %H_%M_%S", localtime())
-        file_count_1 = 0
-        for i in range(0,999):
-            if os.path.isfile("logs/"+gvars.get_log_file()+" "+"%s_hexag_%d.csv"%(cad_temp, i)):
-                file_count_1 +=1
-               
-        print file_count_1 #cantidad de archivos de log que existen de mismo experimento y sujeto en el día actual.
-        cad_temp = "logs/"+gvars.get_log_file()+" "+"%s_hexag_%d.csv"%(cad_temp, file_count_1)
-        #cad_temp = str('%s log_file.txt' % datetime.datetime.isoformat('_') ) 
-        gvars.set_log_file( open(cad_temp,'a') )
-        labyrinth_training.log_to_file("TIME,X,Y,DIRX,DIRY,STROBE,WIN")
-        #####################################
-        #main thread.
-        #####################################
-        import threading
-        mainThread = threading.Thread(target=labyrinth_training.mainFunction)
-        mainThread.start()
-    
     
 
 if __name__ == '__main__':

@@ -6,6 +6,7 @@ class vars_tmaze:
     sprite_positions=[]
     log_to_file_matrix=[]
     
+    lab_type = "tmaze" #hexag or tmaze
     joystick_working = False #true if it is working..
     
     def __init__(self):

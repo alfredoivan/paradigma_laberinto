@@ -257,6 +257,7 @@ def mainFunction():
         
         vectorInstantaneo.x = int(2.2*x_ax)
         vectorInstantaneo.y = int(2.2*y_ax)
+        pass
         #=======================================================================
         # #Analizo vector Instantáneo
         #=======================================================================
@@ -292,6 +293,7 @@ def mainFunction():
             if(gvars.worldMap[int(wm.camera.x - wm.camera.dirx * moveSpeed)][int(wm.camera.y)] == 0):wm.camera.x -= wm.camera.dirx * moveSpeed
             if(gvars.worldMap[int(wm.camera.x)][int(wm.camera.y - wm.camera.diry * moveSpeed)] == 0):wm.camera.y -= wm.camera.diry * moveSpeed
         
+        pass
         #=======================================================================
         # #Análisis áreas del juego: región donde activa luces, región de ganar / perder..
         #=======================================================================
