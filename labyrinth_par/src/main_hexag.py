@@ -12,6 +12,8 @@ import signal
 import sys
 import os
 from rect_cl import Rectangle  # @UnresolvedImport
+from Tkinter import *
+from matplotlib.rcsetup import all_backends
 
 gvars = vars_tmaze.vars_tmaze() #variables del juego a ser accedidas "globalmente"
 
@@ -25,6 +27,8 @@ IMG_RED_FRACTAL = 16 #index de la matriz en worldManager.
 IMG_GREEN_FRACTAL = 17 #index..
 LEFT_RECTANGLE = Rectangle(0,8,0,4)
 RIGHT_RECTANGLE = Rectangle(0,8,19,999)
+ALL_WINDOW = Rect(0,0,1024,768)
+INTERTRIAL_FRAMES_DELAY = 165
 
 vectorInstantaneo = vectorSimple.vectorSimple() #vector con el instantáneo de movimiento, x e y dependen del estado de joystick.
 
@@ -36,23 +40,31 @@ class labyrinth_training():
         import Tkinter
         import tkMessageBox
         
+        
         top = Tkinter.Tk()
         
         def hexCallBack():
             tkMessageBox.showinfo( "Selection:", "Hexagon selected")
             gvars.lab_type = "hexag"
+            print e1.get()
+            gvars.subject_name = e1.get()
             top.destroy()
         
         def tmCallBack():
             tkMessageBox.showinfo( "Selection:", "T-Maze selected")
             gvars.lab_type = "tmaze"
+            print e1.get()
+            gvars.subject_name = e1.get()
             top.destroy()
         
         B = Tkinter.Button(top, text ="Hexagon", command = hexCallBack)
         C = Tkinter.Button(top, text ="T-Maze", command = tmCallBack)
         
+        e1 = Entry(top)
+        
         B.pack()
         C.pack()
+        e1.pack()
         top.mainloop()
         
         if (gvars.lab_type == "hexag"):
@@ -121,7 +133,10 @@ class labyrinth_training():
             
             labyrinth_training.keyboardInput()
             
+            labyrinth_training.drawInterTrial()
+            
             labyrinth_training.evalWhiteSquare()
+            
             
             
             ##########################
@@ -213,8 +228,8 @@ class labyrinth_training():
         #####################################
         #inicializo log y declaro el archivo.
         #####################################
-        subject_name = str(raw_input("Ingrese nombre de sujeto: "))
-        gvars.set_log_file(subject_name)
+        #subject_name = str(raw_input("Ingrese nombre de sujeto: "))
+        gvars.set_log_file(gvars.subject_name)
         from time import strftime, localtime
         cad_temp = strftime("%Y%m%d", localtime())
         #cad_temp = strftime("%Y%m%d %H_%M_%S", localtime())
@@ -326,8 +341,8 @@ class labyrinth_training():
         #####################################
         #inicializo log y declaro el archivo.
         #####################################
-        subject_name = str(raw_input("Ingrese nombre de sujeto: "))
-        gvars.set_log_file(subject_name)
+        #subject_name = str(raw_input("Ingrese nombre de sujeto: "))
+        gvars.set_log_file(gvars.subject_name)
         from time import strftime, localtime
         cad_temp = strftime("%Y%m%d", localtime())
         #cad_temp = strftime("%Y%m%d %H_%M_%S", localtime())
@@ -583,6 +598,8 @@ class labyrinth_training():
                 #reincio de experimento
                 #############################################
                 #log_to_file("Reinicio de experimento.")
+                print "reinicio de experimento"
+                gvars.drawInterTrial = INTERTRIAL_FRAMES_DELAY;
                 gvars.set_door_anim (0)
                 # Restablecer valores de puerta cerrada, no haría falta en sprite_positions
                 for i in range(0, len(gvars.sprite_positions)):
@@ -674,6 +691,7 @@ class labyrinth_training():
             #log_to_file("Reinicio de experimento.")
             gvars.set_delay_reboot_button(1)
             gvars.set_init_whitebox(0) #para que en breve ponga la luz blanca.
+            gvars.drawInterTrial = INTERTRIAL_FRAMES_DELAY;
             gvars.set_user_won(False)
             gvars.set_experiment_ended(False)
             gvars.set_lights_on ( False )
@@ -812,6 +830,8 @@ class labyrinth_training():
     def keyboardInput():
             if (gvars.strobe_value == 1):
                 return;
+            if (gvars.drawInterTrial > 0):
+                return;
             #=======================================================================
             # # Entradas de Teclado.
             #=======================================================================
@@ -868,6 +888,8 @@ class labyrinth_training():
     
     @staticmethod
     def joystickInput():
+            if (gvars.drawInterTrial > 0):
+                return;
             if (gvars.strobe_value == 1):
                 return;
             ############################################
@@ -995,8 +1017,12 @@ class labyrinth_training():
         #size = w, h = 1600,900
         gvars.size = gvars.width_screen, gvars.height_screen = 1366,768
         
+        global ALL_WINDOW
+        ALL_WINDOW = Rect(0,0,1366,768)
+        
         #window = pygame.display.set_mode(size)
         pygame.display.set_mode(gvars.size, pygame.FULLSCREEN)
+        #pygame.display.set_mode(gvars.size, pygame.RESIZABLE)
         
         
         gvars.screen = pygame.display.get_surface()
@@ -1012,6 +1038,26 @@ class labyrinth_training():
         #=======================================================================
         pygame.draw.rect(gvars.screen, (0,0,235), (50-5,gvars.height_screen/2-5-gvars.get_player_score(),15+10,gvars.get_player_score()+1+8), 0)
         pygame.draw.rect(gvars.screen, (0,0,255), (50,gvars.height_screen/2-gvars.get_player_score(),15,gvars.get_player_score()+1), 0)
+        pass
+    
+    @staticmethod
+    def drawInterTrial():
+        if (gvars.drawInterTrial == INTERTRIAL_FRAMES_DELAY):
+            #print "strobe start"
+            gvars.set_init_whitebox(0)
+        if (gvars.drawInterTrial == 1):
+            #print "strobe end"
+            gvars.set_init_whitebox(0)
+        
+        if (gvars.drawInterTrial > 0):
+            #pygame.draw.rect(gvars.screen, pygame.color.Color., Rect, width=0)
+            #print "drawing intertrial: %d" %gvars.drawInterTrial
+            pygame.draw.rect(gvars.screen, Color('black'), ALL_WINDOW)
+            #pygame.draw.circle(gvars.screen, Color('white'), (gvars.width_screen / 2, gvars.height_screen/2), 10, width=10)
+            pygame.draw.circle(gvars.screen, Color('white'), (gvars.width_screen / 2, gvars.height_screen/2), 10, 0)
+            #pygame.draw.rect(gvars.screen, Color('black'), ALL_WINDOW)
+            gvars.drawInterTrial-= 1 
+            
         pass
     
     @staticmethod

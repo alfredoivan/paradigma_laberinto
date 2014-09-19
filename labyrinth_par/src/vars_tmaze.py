@@ -8,6 +8,8 @@ class vars_tmaze:
     
     lab_type = "tmaze" #hexag or tmaze
     joystick_working = False #true if it is working..
+    subject_name = ""
+    drawInterTrial=0;
     
     def __init__(self):
         self.__anim_count = 0 #variable que indica el fotograma de la animación de fin de experimento.
