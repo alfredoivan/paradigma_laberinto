@@ -9,11 +9,9 @@ import math
 import worldManager
 import time
 import signal
-import sys
 import os
 from rect_cl import Rectangle  # @UnresolvedImport
-from Tkinter import *
-from matplotlib.rcsetup import all_backends
+from Tkinter import * # @UnusedWildImport
 
 gvars = vars_tmaze.vars_tmaze() #variables del juego a ser accedidas "globalmente"
 
