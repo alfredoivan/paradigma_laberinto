@@ -10,6 +10,8 @@ class vars_tmaze:
     joystick_working = False #true if it is working..
     subject_name = ""
     drawInterTrial=0;
+    putInterTrial = False
+    hasStarted = False
     
     def __init__(self):
         self.__anim_count = 0 #variable que indica el fotograma de la animación de fin de experimento.

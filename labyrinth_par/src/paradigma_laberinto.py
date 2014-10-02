@@ -64,6 +64,7 @@ class labyrinth_training():
         e1.insert(0, "Nombre")
         
         
+        
         B.pack()
         C.pack()
         e1.pack()
@@ -96,11 +97,13 @@ class labyrinth_training():
         gvars.strobe_value = 0  # 0=Negro 1=Blanco
         gvars.win_value = 0  # 0=en juego , 1=perdió , 2=ganó
         gvars.win_value_f = 0  # se guarda en memoria si se gana o pierde, y se pone en log sólo cuando hay un strobe
-        gvars.keep_log = False  # true=logear este ciclo. Permite no logear los intersticios de
+        #gvars.keep_log = False  # true=logear este ciclo. Permite no logear los intersticios de
         #                       tiempo en donde ya se sabe que ganó y hasta el siguiente strobe de reinicio..
         gvars.screen = pygame.display.get_surface()  # again, else tmaze will crash.
         pygame.time.delay(500)
         
+        #initially put a intertrial to the user.
+        gvars.putInterTrial = True
         
         while(True):
             if (initial_frames_latency > 0):
@@ -441,11 +444,13 @@ class labyrinth_training():
                     # log_to_file("Fin experimento.")
                     gvars.set_anim_count(1)
                     gvars.win_value = 2
+                    gvars.win_value_f = 2
                     gvars.set_init_whitebox(0)
                 else:
                     # log_to_file("Sujeto PIERDE.")
                     # log_to_file("Fin experimento.")
                     gvars.win_value = 1
+                    gvars.win_value_f = 1
                     gvars.set_user_won(False)
                     gvars.set_anim_count(71)
                     gvars.set_init_whitebox(0)
@@ -463,10 +468,12 @@ class labyrinth_training():
                     gvars.set_anim_count(1)
                     labyrinth_training.add_score()
                     gvars.win_value = 2
+                    gvars.win_value_f = 2
                     gvars.set_init_whitebox(0)
                 else:
                     # log_to_file("Sujeto PIERDE.")
                     gvars.win_value = 1
+                    gvars.win_value_f = 1
                     gvars.set_user_won(False)
                     gvars.set_anim_count(71)
                     gvars.set_init_whitebox(0)
@@ -696,12 +703,14 @@ class labyrinth_training():
             # log_to_file("Reinicio de experimento.")
             gvars.set_delay_reboot_button(1)
             gvars.set_init_whitebox(0)  # para que en breve ponga la luz blanca.
-            gvars.drawInterTrial = INTERTRIAL_FRAMES_DELAY;
+            gvars.putInterTrial = True
             gvars.set_user_won(False)
             gvars.set_experiment_ended(False)
             gvars.set_lights_on (False)
             gvars.set_light_sample(False)
             gvars.sprite_positions = []
+            gvars.win_value = 3 #para intertrial
+            gvars.win_value_f = 3 #para intertrial
             gvars.wm = worldManager.WorldManager(gvars.worldMap, gvars.sprite_positions, 70, 11.5, -1, 0, 0, 1)
             time.sleep(0.1)
     
@@ -820,14 +829,19 @@ class labyrinth_training():
         ##########################
         pygame.draw.rect(gvars.screen, Color('black'), WHITE_SQUARE)
         if (gvars.get_init_whitebox() < 8):
-            if (gvars.get_init_whitebox() == 2):
+            if (gvars.get_init_whitebox() == 0):
+                gvars.hasStarted = True
                 pygame.draw.rect(gvars.screen, Color('white'), WHITE_SQUARE)
                 gvars.strobe_value = 1
                 pygame.display.update(WHITE_SQUARE)
-                pygame.time.delay(100)
+                pygame.time.delay(50)
+                gvars.strobe_value = 1
+                labyrinth_training.onlyLog();
+                pygame.time.delay(50)
                 pygame.draw.rect(gvars.screen, Color('black'), WHITE_SQUARE)
                 # pygame.display.flip()   #Update screen
                 gvars.win_value = gvars.win_value_f
+                gvars.strobe_value = 0
             gvars.set_init_whitebox(gvars.get_init_whitebox() + 1)
         pass
     
@@ -845,7 +859,7 @@ class labyrinth_training():
                 
             if (gvars.get_delay_reboot_button() == 12):
                 gvars.set_delay_reboot_button(0)
-            if (gvars.get_door_anim() == 0 and gvars.keep_log == True):
+            if (gvars.get_door_anim() == 0 ):
                 keys = pygame.key.get_pressed()
                 if keys[K_SPACE]:
                     # Forzar Reinicio: como si hubiera ganado o perdido.
@@ -905,7 +919,7 @@ class labyrinth_training():
             
             x = 0
             y = 0
-            if (gvars.joystick_working == True and gvars.get_door_anim() == 0 and gvars.keep_log == True):
+            if (gvars.joystick_working == True and gvars.get_door_anim() == 0):
                 x = gvars.my_joystick.get_axis(0)
                 y = gvars.my_joystick.get_axis(1)
             x_ax1 = int(x)
@@ -1047,13 +1061,19 @@ class labyrinth_training():
     
     @staticmethod
     def drawInterTrial():
+        if (gvars.putInterTrial == True):
+                gvars.drawInterTrial = INTERTRIAL_FRAMES_DELAY;
+                gvars.putInterTrial = False;
+        pass
         if (gvars.drawInterTrial == INTERTRIAL_FRAMES_DELAY):
             # print "strobe start"
             gvars.set_init_whitebox(0)
         if (gvars.drawInterTrial == 1):
             # print "strobe end"
             gvars.set_init_whitebox(0)
-        
+            gvars.win_value = 0 #set to trial start
+            gvars.win_value_f = 0 #set to trial start
+            gvars.drawInterTrial = 0
         if (gvars.drawInterTrial > 0):
             # pygame.draw.rect(gvars.screen, pygame.color.Color., Rect, width=0)
             # print "drawing intertrial: %d" %gvars.drawInterTrial
@@ -1071,18 +1091,25 @@ class labyrinth_training():
             # ## Log to file:
             #=======================================================================
             # will only log during trial, after door opening and before trial starts again, no logging..
-            
-            if (gvars.keep_log or gvars.strobe_value > 0):
-                milis = (pygame.time.get_ticks())
-                labyrinth_training.log_to_file("%d,%f,%f,%f,%f,%d,%d" % (milis, gvars.wm.camera.x, gvars.wm.camera.y, gvars.wm.camera.dirx,
-                                                       gvars.wm.camera.diry, gvars.strobe_value, gvars.win_value))
+            if (gvars.hasStarted == False):
+                return;
+            if (gvars.drawInterTrial > 0 and gvars.strobe_value == 0):
+                #intertrial, so put win_value 3
+                gvars.win_value = 3
+            labyrinth_training.onlyLog();
             # print (gvars.wm.camera.x), gvars.wm.camera.y
-            if (gvars.strobe_value == 1 and gvars.win_value == 0):
-                # empezar a logear
-                gvars.keep_log = True
-            elif (gvars.strobe_value == 1 and gvars.win_value > 0):
-                gvars.keep_log = False
+#             if (gvars.strobe_value == 1 and gvars.win_value == 0):
+#                 # empezar a logear
+#                 gvars.keep_log = True
+#             elif (gvars.strobe_value == 1 and gvars.win_value > 0):
+#                 gvars.keep_log = False
             pass
+    
+    @staticmethod
+    def onlyLog():
+        milis = (pygame.time.get_ticks())
+        labyrinth_training.log_to_file("%d,%f,%f,%f,%f,%d,%d" % (milis, gvars.wm.camera.x, gvars.wm.camera.y, gvars.wm.camera.dirx,
+                                                       gvars.wm.camera.diry, gvars.strobe_value, gvars.win_value))
     
     @staticmethod
     def add_score():
