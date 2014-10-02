@@ -40,6 +40,7 @@ class labyrinth_training():
         import tkMessageBox
         
         top = Tkinter.Tk()
+        
         top.title("Paradigma laberinto")
         gvars.lab_type = ""
         def hexCallBack():
@@ -56,8 +57,8 @@ class labyrinth_training():
             gvars.subject_name = e1.get()
             top.destroy()
         
-        B = Tkinter.Button(top, text="Hexagon", command=hexCallBack, height=3, width=25)
-        C = Tkinter.Button(top, text="T-Maze", command=tmCallBack, height=3, width=25)
+        B = Tkinter.Button(top, text="Hexagon", command=hexCallBack, height=5, width=40)
+        C = Tkinter.Button(top, text="T-Maze", command=tmCallBack, height=5, width=40)
         
         e1 = Entry(top, width=40)
         e1.delete(0, END)
@@ -99,7 +100,7 @@ class labyrinth_training():
         gvars.win_value_f = 0  # se guarda en memoria si se gana o pierde, y se pone en log sólo cuando hay un strobe
         #gvars.keep_log = False  # true=logear este ciclo. Permite no logear los intersticios de
         #                       tiempo en donde ya se sabe que ganó y hasta el siguiente strobe de reinicio..
-        gvars.screen = pygame.display.get_surface()  # again, else tmaze will crash.
+        gvars.screen = ( pygame.display.get_surface() )  # again, else tmaze will crash.
         pygame.time.delay(500)
         
         #initially put a intertrial to the user.
@@ -108,13 +109,16 @@ class labyrinth_training():
         while(True):
             if (initial_frames_latency > 0):
                 initial_frames_latency -= 1
+            pygame.event.clear() #to remove (presumably old) events from the queue
             
             
+            #gvars.clock.tick(60)
+            gvars.clock.tick_busy_loop(15)
             
-            gvars.wm.draw(gvars.screen)
-            gvars.clock.tick(60)
+            gvars.wm.draw(gvars.screen) #draw everything related to maze, to the surface
             
             gvars.strobe_value = 0 
+            
             
             labyrinth_training.drawScoreBar();
             
@@ -146,13 +150,12 @@ class labyrinth_training():
             labyrinth_training.evalWhiteSquare()
             
             
-            
             ##########################
             # pygame.display.update()
             ##########################
             if (initial_frames_latency == 0):
                 pygame.display.flip()
-                pygame.time.delay(10)
+                #pygame.time.delay(20)
             
             labyrinth_training.log_frame();
     
@@ -839,7 +842,7 @@ class labyrinth_training():
                 labyrinth_training.onlyLog();
                 pygame.time.delay(50)
                 pygame.draw.rect(gvars.screen, Color('black'), WHITE_SQUARE)
-                # pygame.display.flip()   #Update screen
+                pygame.display.update(WHITE_SQUARE)
                 gvars.win_value = gvars.win_value_f
                 gvars.strobe_value = 0
             gvars.set_init_whitebox(gvars.get_init_whitebox() + 1)
@@ -1040,7 +1043,7 @@ class labyrinth_training():
         ALL_WINDOW = Rect(0, 0, 1366, 768)
         
         # window = pygame.display.set_mode(size)
-        pygame.display.set_mode(gvars.size, pygame.FULLSCREEN)
+        gvars.mainWindow = pygame.display.set_mode(gvars.size, pygame.FULLSCREEN)
         # pygame.display.set_mode(gvars.size, pygame.RESIZABLE)
         
         
