@@ -112,10 +112,11 @@ class labyrinth_training():
             pygame.event.clear() #to remove (presumably old) events from the queue
             
             
-            #gvars.clock.tick(60)
-            gvars.clock.tick_busy_loop(15)
             
             gvars.wm.draw(gvars.screen) #draw everything related to maze, to the surface
+            #gvars.clock.tick(60)
+            gvars.clock.tick_busy_loop(60)
+            
             
             gvars.strobe_value = 0 
             
@@ -148,6 +149,7 @@ class labyrinth_training():
             labyrinth_training.drawInterTrial()
             
             labyrinth_training.evalWhiteSquare()
+            
             
             
             ##########################
@@ -249,7 +251,7 @@ class labyrinth_training():
             if os.path.isfile("logs/" + gvars.get_log_file() + " " + "%s_hexag_%d.csv" % (cad_temp, i)):
                 file_count_1 += 1
                
-        print file_count_1  # cantidad de archivos de log que existen de mismo experimento y sujeto en el día actual.
+        print "previous files found: %d" % file_count_1  # cantidad de archivos de log que existen de mismo experimento y sujeto en el día actual.
         cad_temp = "logs/" + gvars.get_log_file() + " " + "%s_hexag_%d.csv" % (cad_temp, file_count_1)
         # cad_temp = str('%s log_file.txt' % datetime.datetime.isoformat('_') ) 
         gvars.set_log_file(open(cad_temp, 'a'))
@@ -362,7 +364,7 @@ class labyrinth_training():
             if os.path.isfile("logs/" + gvars.get_log_file() + " " + "%s_tmaze_%d.csv" % (cad_temp, i)):
                 file_count_1 += 1
                
-        print file_count_1  # cantidad de archivos de log que existen de mismo experimento y sujeto en el día actual.
+        print "previous files found: %d" % file_count_1  # cantidad de archivos de log que existen de mismo experimento y sujeto en el día actual.
         cad_temp = "logs/" + gvars.get_log_file() + " " + "%s_tmaze_%d.csv" % (cad_temp, file_count_1)
         # cad_temp = str('%s log_file.txt' % datetime.datetime.isoformat('_') ) 
         gvars.set_log_file(open(cad_temp, 'a'))
@@ -380,26 +382,41 @@ class labyrinth_training():
         #################################################################
         # ## Elección de puerta que tiene recompensa.
         #################################################################
-        rndnum = randint(0, 5)
-                    
+        rndnum = randint(0, 5)  # @UnusedVariable
+        #print rndnum
+        rndnum = randint(0, 5)  # @UnusedVariable
+        #print rndnum
+        rndnum = randint(0, 5)  # @UnusedVariable
+        #print rndnum
+        rndnum = randint(0, 5)  # @UnusedVariable
+        #print rndnum
+        rndnum = randint(0, 5)  # @UnusedVariable
+        #print rndnum
+        
         gvars.set_num_puerta(rndnum)
                     
-        if (rndnum == 0):
+        if rndnum == 0:
+                        #print "círculo a la izquierda"
                         gvars.set_posx_to_set(10.518899) 
                         gvars.set_posy_to_set(48.553612)
         elif rndnum == 1:
+                        #print "triángulo a la derecha"
                         gvars.set_posx_to_set(1.831244)
                         gvars.set_posy_to_set(26.49384)
         elif rndnum == 2:
+                        #print "triángulo a la izquierda"
                         gvars.set_posx_to_set(10.08041)
                         gvars.set_posy_to_set(4.028711)
         elif rndnum == 3:
+                        #print "cuadrado a la derecha"
                         gvars.set_posx_to_set(40.0201579)
                         gvars.set_posy_to_set(4.1025887)
         elif rndnum == 4:
+                        #print "cuadrado a la izquierda"
                         gvars.set_posx_to_set(48.131992)
                         gvars.set_posy_to_set(26.51180)
         elif rndnum == 5:
+                        #print "círculo a la derecha"
                         gvars.set_posx_to_set(39.487556)
                         gvars.set_posy_to_set(48.143990)
         
@@ -416,16 +433,17 @@ class labyrinth_training():
     
     @staticmethod
     def initTMazeMaze():
-        a = randint(0, 99)
+        a = randint(0, 200)
         global IMG_RED_FRACTAL
         global IMG_GREEN_FRACTAL
-        if (a > 50):
+        if (a > 100):
                 
                 IMG_RED_FRACTAL = 16
                 IMG_GREEN_FRACTAL = 17
         else:
                 IMG_RED_FRACTAL = 17
                 IMG_GREEN_FRACTAL = 16
+        labyrinth_training.randomizeTMazeLights();
         # gvars.wm = worldManager.WorldManager(gvars.worldMap,gvars.sprite_positions, 70, 11.5, -1, 0, 0, 1)
         gvars.wm = worldManager.WorldManager(gvars.worldMap, gvars.sprite_positions, 70, 11.5, -1, 0, 0, 1)
         
@@ -442,6 +460,7 @@ class labyrinth_training():
             
             if (gvars.get_anim_count() == 0):
                 if ((gvars.get_green_right() == 1 and gvars.get_color_experiment() == 0) or (gvars.get_green_right() == 0 and gvars.get_color_experiment() == 1)):
+                    #sujeto gana
                     gvars.set_user_won(True)
                     labyrinth_training.add_score()
                     # log_to_file("Fin experimento.")
@@ -467,6 +486,7 @@ class labyrinth_training():
             
             if (gvars.get_anim_count() == 0):
                 if ((gvars.get_green_right() == 1 and gvars.get_color_experiment() == 1) or (gvars.get_green_right() == 0 and gvars.get_color_experiment() == 0)):
+                    #sujeto gana
                     gvars.set_user_won(True)
                     gvars.set_anim_count(1)
                     labyrinth_training.add_score()
@@ -482,7 +502,7 @@ class labyrinth_training():
                     gvars.set_init_whitebox(0)
         
         if (gvars.wm.camera.x < 36 and gvars.get_lights_on() == False):
-            # log_to_file("Se encienden señales de COMPARISSON")
+            # log_to_file("Se encienden señales de COMPARISSON") #los fractales.
             pygame.draw.rect(gvars.screen, Color('white'), WHITE_SQUARE)
             gvars.set_init_whitebox(0)
             # gvars.strobe_value = 1
@@ -525,33 +545,11 @@ class labyrinth_training():
         #=======================================================================
         if (gvars.wm.camera.x < 57 and gvars.get_light_sample() == False):
                     gvars.set_light_sample(True)
-                    # log_to_file("Se encienden señales de SAMPLE")
+                    # log_to_file("Se encienden señales de SAMPLE") #la luz verde/roja
                     pygame.draw.rect(gvars.screen, Color('white'), WHITE_SQUARE)
                     # gvars.strobe_value = 1
                     gvars.set_init_whitebox(0)
-                    gvars.set_color_experiment (randint(0, 99))
-                    # determino si el color que debe seguir el usuario es el rojo o verde
-                    # color_experiment = 1 significa VERDE
-                    # color_experiment = 0 significa ROJO
-                    # green_right = 0 significa SEÑAL VERDE EN LADO IZQUIERDO
-                    # green_right = 1 significa SEÑAL VERDE EN LADO DERECHO
-                    if (gvars.get_color_experiment() > 49):
-                        gvars.set_color_experiment (1)  # GREEN
-                        # log_to_file("Color a seguir en el laberinto: VERDE")
-                    else:
-                        gvars.set_color_experiment (0)  # RED
-                        # log_to_file("Color a seguir en el laberinto: ROJO")
-                                    
-                    # se establece otro número aleatorio para la posición de los colores. Rojo izq, verde der, o al revés:
-                    gvars.set_green_right(randint(0, 99))
-                    if (gvars.get_green_right() > 49):
-                        gvars.set_green_right(1)  # GREEN derecha
-                        # log_to_file("Posición del color verde: DERECHA")
-                        # log_to_file("Posición del color rojo: IZQUIERDA")
-                    else:
-                        gvars.set_green_right(0)  # GREEN izquierda
-                        # log_to_file("Posición del color verde: IZQUIERDA")
-                        # log_to_file("Posición del color rojo: DERECHA")
+                    
                     if (gvars.get_green_right() == 0 and gvars.get_color_experiment() == 1):
                             gvars.sprite_positions = [
                               # Tres luces: Sample, y las dos para comparisson
@@ -613,7 +611,8 @@ class labyrinth_training():
                 # reincio de experimento
                 #############################################
                 # log_to_file("Reinicio de experimento.")
-                print "reinicio de experimento"
+                pass
+                #print "reinicio de experimento"
                 gvars.drawInterTrial = INTERTRIAL_FRAMES_DELAY;
                 gvars.set_door_anim (0)
                 # Restablecer valores de puerta cerrada, no haría falta en sprite_positions
@@ -626,6 +625,10 @@ class labyrinth_training():
                 ########################
                 # randomizar la cámara:
                 ########################
+                temp_rand_num = randint(0, 30) #
+                temp_rand_num = randint(0, 30)
+                temp_rand_num = randint(0, 30)
+                temp_rand_num = randint(0, 30)
                 temp_rand_num = randint(0, 30)
                 flt_num = (temp_rand_num * 2 * 3.1415) / 30
                 # en flt_num tengo un ángulo aleatorio entre 0 y 2pi
@@ -706,6 +709,7 @@ class labyrinth_training():
         if ((gvars.get_experiment_ended() == True) and (gvars.get_anim_count() == 0)):
             # comienza animación
             # log_to_file("Reinicio de experimento.")
+            labyrinth_training.randomizeTMazeLights();
             gvars.set_delay_reboot_button(1)
             gvars.set_init_whitebox(0)  # para que en breve ponga la luz blanca.
             gvars.putInterTrial = True
@@ -718,6 +722,35 @@ class labyrinth_training():
             gvars.win_value_f = 3 #para intertrial
             gvars.wm = worldManager.WorldManager(gvars.worldMap, gvars.sprite_positions, 70, 11.5, -1, 0, 0, 1)
             #time.sleep(0.1)
+    
+    @staticmethod
+    def randomizeTMazeLights():
+        gvars.set_color_experiment (randint(0, 200))
+        # determino si el color que debe seguir el usuario es el rojo o verde
+        # color_experiment = 1 significa VERDE
+        # color_experiment = 0 significa ROJO
+        # green_right = 0 significa SEÑAL VERDE EN LADO IZQUIERDO
+        # green_right = 1 significa SEÑAL VERDE EN LADO DERECHO
+        pass
+        #print gvars.get_color_experiment()
+        if (gvars.get_color_experiment() > 100):
+            gvars.set_color_experiment (1)  # GREEN
+            # log_to_file("Color a seguir en el laberinto: VERDE")
+        else:
+            gvars.set_color_experiment (0)  # RED
+            # log_to_file("Color a seguir en el laberinto: ROJO")
+        pass
+        # se establece otro número aleatorio para la posición de los colores. Rojo izq, verde der, o al revés:
+        gvars.set_green_right(randint(0, 200))
+        if (gvars.get_green_right() > 100):
+            gvars.set_green_right(1)  # GREEN derecha
+            # log_to_file("Posición del color verde: DERECHA")
+            # log_to_file("Posición del color rojo: IZQUIERDA")
+        else:
+            gvars.set_green_right(0)  # GREEN izquierda
+            # log_to_file("Posición del color verde: IZQUIERDA")
+            # log_to_file("Posición del color rojo: DERECHA")
+        pass
     
     @staticmethod
     def analyzeHexagCollisions():
@@ -1042,9 +1075,11 @@ class labyrinth_training():
         
         # size = w, h = 1600,900
         gvars.size = gvars.width_screen, gvars.height_screen = 1366, 768
+        #gvars.size = gvars.width_screen, gvars.height_screen = 640, 480
         
         global ALL_WINDOW
         ALL_WINDOW = Rect(0, 0, 1366, 768)
+        #ALL_WINDOW = Rect(0, 0, 640, 480)
         
         # window = pygame.display.set_mode(size)
         gvars.mainWindow = pygame.display.set_mode(gvars.size, pygame.FULLSCREEN)
@@ -1082,6 +1117,10 @@ class labyrinth_training():
             gvars.win_value = 0 #set to trial start
             gvars.win_value_f = 0 #set to trial start
             gvars.drawInterTrial = 0
+            gvars.trialStarting = 1
+            if (gvars.trainingStarting == 1 and gvars.lab_type == "hexag"):
+                gvars.trainingStarting_f = 1
+                gvars.trainingStarting = 0;
         if (gvars.drawInterTrial > 0):
             # pygame.draw.rect(gvars.screen, pygame.color.Color., Rect, width=0)
             # print "drawing intertrial: %d" %gvars.drawInterTrial
@@ -1115,6 +1154,36 @@ class labyrinth_training():
     
     @staticmethod
     def onlyLog():
+        if (gvars.trialStarting == 1 and gvars.lab_type == "tmaze"):
+                    #trial is just starting, in tmaze case, put type of trial in the strobe field.
+                    gvars.strobe_value = 9;
+                    if (gvars.get_color_experiment() == 1 and gvars.get_green_right() == 1):
+                        #color verde, verde aparece a la derecha
+                        gvars.strobe_value = 2;
+                        #print "color verde, verde aparece a la derecha"
+                        pass
+                    if (gvars.get_color_experiment() == 1 and gvars.get_green_right() == 0):
+                        #color verde, verde aparece a la izquierda
+                        gvars.strobe_value = 3;
+                        #print "color verde, verde aparece a la izquierda"
+                        pass
+                    if (gvars.get_color_experiment() == 0 and gvars.get_green_right() == 0):
+                        #color rojo, rojo aparece a la derecha
+                        gvars.strobe_value = 4;
+                        #print "#color rojo, rojo aparece a la derecha"
+                        pass
+                    if (gvars.get_color_experiment() == 0 and gvars.get_green_right() == 1):
+                        #color rojo, rojo aparece a la izquierda
+                        gvars.strobe_value = 5;
+                        #print "#color rojo, rojo aparece a la izquierda"
+                        pass
+                    
+                    gvars.trialStarting = 0;
+        if (gvars.trainingStarting_f == 1 and gvars.trainingStarting == 0):
+                gvars.trainingStarting_f = 0
+                gvars.strobe_value = gvars.get_num_puerta() + 2;
+                print "first strobe with num: %d"%gvars.strobe_value
+                pass
         milis = (pygame.time.get_ticks())
         labyrinth_training.log_to_file("%d,%f,%f,%f,%f,%d,%d" % (milis, gvars.wm.camera.x, gvars.wm.camera.y, gvars.wm.camera.dirx,
                                                        gvars.wm.camera.diry, gvars.strobe_value, gvars.win_value))

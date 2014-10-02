@@ -14,6 +14,9 @@ class vars_tmaze:
     hasStarted = False
     mainWindow = ""; #main window screen (pygame)
     notPlayable = False; #if true, currently it's not playable (keyb and joyst not available)
+    trialStarting = 0; #if 1, the trial is starting (start strobe has just finished executing..)
+    trainingStarting = 1; #training just starting, first trial.
+    trainingStarting_f = 1; #training just starting, first trial.
     
     def __init__(self):
         self.__anim_count = 0 #variable que indica el fotograma de la animación de fin de experimento.
