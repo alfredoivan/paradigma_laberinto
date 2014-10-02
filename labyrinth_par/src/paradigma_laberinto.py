@@ -696,11 +696,11 @@ class labyrinth_training():
         if (gvars.get_anim_count() > 0 and gvars.get_anim_count() < 60):
             gvars.notPlayable = True
             vars_tmaze.blit_alpha(gvars.screen, IMG_WIN_MONEY, (gvars.width_screen / 2 - 250, 0), 255 - gvars.get_anim_count() * 4)
-            gvars.set_anim_count(gvars.get_anim_count() + 5)
+            gvars.set_anim_count(gvars.get_anim_count() + 3)
         if (gvars.get_anim_count() > 70 and gvars.get_anim_count() < 130):
             gvars.notPlayable = True
             vars_tmaze.blit_alpha(gvars.screen, IMG_LOSE_SADFACE, (gvars.width_screen / 2 - 250, 0), 255 - (gvars.get_anim_count() - 70) * 4)
-            gvars.set_anim_count(gvars.get_anim_count() + 5)
+            gvars.set_anim_count(gvars.get_anim_count() + 3)
         if (gvars.get_anim_count() == 61 or gvars.get_anim_count() == 131):
             gvars.set_anim_count(0)
             gvars.set_experiment_ended(True)
@@ -1046,8 +1046,10 @@ class labyrinth_training():
             ###############################################
             # speed modifiers (desplazamiento, rotación)
             ###############################################
-            gvars.moveSpeed = frameTime * 10.2  # the constant value is in squares / second
-            gvars.rotSpeed = frameTime * 1.5  # the constant value is in radians / second
+            #gvars.moveSpeed = frameTime * 10.2  # the constant value is in squares / second
+            #gvars.rotSpeed = frameTime * 1.5  # the constant value is in radians / second
+            gvars.moveSpeed = frameTime * 6.63  # the constant value is in squares / second
+            gvars.rotSpeed = frameTime * 0.975  # the constant value is in radians / second
     
     @staticmethod
     def initJoystick():
