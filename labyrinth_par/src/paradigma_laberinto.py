@@ -691,11 +691,13 @@ class labyrinth_training():
         # # Animación de ganaste / perdiste:
         #=======================================================================
         if (gvars.get_anim_count() > 0 and gvars.get_anim_count() < 60):
-                vars_tmaze.blit_alpha(gvars.screen, IMG_WIN_MONEY, (gvars.width_screen / 2 - 250, 0), 255 - gvars.get_anim_count() * 4)
-                gvars.set_anim_count(gvars.get_anim_count() + 5)
+            gvars.notPlayable = True
+            vars_tmaze.blit_alpha(gvars.screen, IMG_WIN_MONEY, (gvars.width_screen / 2 - 250, 0), 255 - gvars.get_anim_count() * 4)
+            gvars.set_anim_count(gvars.get_anim_count() + 5)
         if (gvars.get_anim_count() > 70 and gvars.get_anim_count() < 130):
-                vars_tmaze.blit_alpha(gvars.screen, IMG_LOSE_SADFACE, (gvars.width_screen / 2 - 250, 0), 255 - (gvars.get_anim_count() - 70) * 4)
-                gvars.set_anim_count(gvars.get_anim_count() + 5)
+            gvars.notPlayable = True
+            vars_tmaze.blit_alpha(gvars.screen, IMG_LOSE_SADFACE, (gvars.width_screen / 2 - 250, 0), 255 - (gvars.get_anim_count() - 70) * 4)
+            gvars.set_anim_count(gvars.get_anim_count() + 5)
         if (gvars.get_anim_count() == 61 or gvars.get_anim_count() == 131):
             gvars.set_anim_count(0)
             gvars.set_experiment_ended(True)
@@ -715,7 +717,7 @@ class labyrinth_training():
             gvars.win_value = 3 #para intertrial
             gvars.win_value_f = 3 #para intertrial
             gvars.wm = worldManager.WorldManager(gvars.worldMap, gvars.sprite_positions, 70, 11.5, -1, 0, 0, 1)
-            time.sleep(0.1)
+            #time.sleep(0.1)
     
     @staticmethod
     def analyzeHexagCollisions():
@@ -853,6 +855,8 @@ class labyrinth_training():
             if (gvars.strobe_value == 1):
                 return;
             if (gvars.drawInterTrial > 0):
+                return;
+            if (gvars.notPlayable):
                 return;
             #=======================================================================
             # # Entradas de Teclado.
@@ -1067,6 +1071,7 @@ class labyrinth_training():
         if (gvars.putInterTrial == True):
                 gvars.drawInterTrial = INTERTRIAL_FRAMES_DELAY;
                 gvars.putInterTrial = False;
+                gvars.notPlayable = False
         pass
         if (gvars.drawInterTrial == INTERTRIAL_FRAMES_DELAY):
             # print "strobe start"

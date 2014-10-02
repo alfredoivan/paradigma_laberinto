@@ -13,6 +13,7 @@ class vars_tmaze:
     putInterTrial = False
     hasStarted = False
     mainWindow = ""; #main window screen (pygame)
+    notPlayable = False; #if true, currently it's not playable (keyb and joyst not available)
     
     def __init__(self):
         self.__anim_count = 0 #variable que indica el fotograma de la animación de fin de experimento.
