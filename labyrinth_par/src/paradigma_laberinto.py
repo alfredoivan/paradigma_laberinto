@@ -14,26 +14,30 @@ import os
 from rect_cl import Rectangle  # @UnresolvedImport
 from Tkinter import *  # @UnusedWildImport
 
-gvars = vars_tmaze.vars_tmaze()  # variables del juego a ser accedidas "globalmente"
-
-PROGRAM_VERSION = "1.3.1"
-CYCLE_LOOP_NUMBER = 2  # cantidad de ciclos que deben pasar para que se ejecuten los movimientos en el mapa 3D
-IMG_WIN_MONEY = pygame.image.load('pics/items/money.png')
-IMG_LOSE_SADFACE = pygame.image.load('pics/items/sadface.gif')
-# FPS = 8
-WHITE_SQUARE = Rect(0, 0, 100, 100)
-IMG_RED_FRACTAL = 16  # index de la matriz en worldManager.
-IMG_GREEN_FRACTAL = 17  # index..
-LEFT_RECTANGLE = Rectangle(0, 8, 0, 4)
-RIGHT_RECTANGLE = Rectangle(0, 8, 19, 999)
-ALL_WINDOW = Rect(0, 0, 1024, 768)
-INTERTRIAL_FRAMES_DELAY = 165
-
-vectorInstantaneo = vectorSimple.vectorSimple()  # vector con el instantáneo de movimiento, x e y dependen del estado de joystick.
 
 
 
 class labyrinth_training():
+    
+    
+    gvars = vars_tmaze.vars_tmaze()  # variables del juego a ser accedidas "globalmente"
+    
+    PROGRAM_VERSION = "1.3.2"
+    CYCLE_LOOP_NUMBER = 2  # cantidad de ciclos que deben pasar para que se ejecuten los movimientos en el mapa 3D
+    IMG_WIN_MONEY = pygame.image.load('pics/items/money.png')
+    IMG_LOSE_SADFACE = pygame.image.load('pics/items/sadface.gif')
+    # FPS = 8
+    WHITE_SQUARE = Rect(0, 0, 100, 100)
+    IMG_RED_FRACTAL = 16  # index de la matriz en worldManager.
+    IMG_GREEN_FRACTAL = 17  # index..
+    LEFT_RECTANGLE = Rectangle(0, 8, 0, 4)
+    RIGHT_RECTANGLE = Rectangle(0, 8, 19, 999)
+    ALL_WINDOW = Rect(0, 0, 1024, 768)
+    INTERTRIAL_FRAMES_DELAY = 165
+    
+    vectorInstantaneo = vectorSimple.vectorSimple()  # vector con el instantáneo de movimiento, x e y dependen del estado de joystick.
+    
+    
     
     def __init__(self):
         import Tkinter
@@ -42,19 +46,19 @@ class labyrinth_training():
         top = Tkinter.Tk()
         
         top.title("Paradigma laberinto")
-        gvars.lab_type = ""
+        labyrinth_training.gvars.lab_type = ""
         def hexCallBack():
             tkMessageBox.showinfo("Selection: Hexagon", "Hexagon selected")
-            gvars.lab_type = "hexag"
+            labyrinth_training.gvars.lab_type = "hexag"
             print e1.get()
-            gvars.subject_name = e1.get()
+            labyrinth_training.gvars.subject_name = e1.get()
             top.destroy()
         
         def tmCallBack():
             tkMessageBox.showinfo("Selection: T-Maze", "T-Maze selected")
-            gvars.lab_type = "tmaze"
+            labyrinth_training.gvars.lab_type = "tmaze"
             print e1.get()
-            gvars.subject_name = e1.get()
+            labyrinth_training.gvars.subject_name = e1.get()
             top.destroy()
         
         B = Tkinter.Button(top, text="Hexagon", command=hexCallBack, height=5, width=40)
@@ -71,9 +75,9 @@ class labyrinth_training():
         e1.pack()
         top.mainloop()
         
-        if (gvars.lab_type == "hexag"):
+        if (labyrinth_training.gvars.lab_type == "hexag"):
             labyrinth_training.init_hexag_training();
-        elif gvars.lab_type == "tmaze":
+        elif labyrinth_training.gvars.lab_type == "tmaze":
             labyrinth_training.init_tmaze_training();
         else:
             # probablemente no eligió ninguno de los dos. cerrar programa.
@@ -85,9 +89,9 @@ class labyrinth_training():
         
         labyrinth_training.initJoystick()
         
-        if gvars.lab_type == "hexag":
+        if labyrinth_training.gvars.lab_type == "hexag":
             labyrinth_training.initHexagMaze()
-        elif gvars.lab_type == "tmaze":
+        elif labyrinth_training.gvars.lab_type == "tmaze":
             labyrinth_training.initTMazeMaze()
         
         
@@ -95,16 +99,16 @@ class labyrinth_training():
         #===========================================================================
         # #variables de logeo: strobe_value, win_value. Se graban en archivo de log al final del bucle
         #===========================================================================
-        gvars.strobe_value = 0  # 0=Negro 1=Blanco
-        gvars.win_value = 0  # 0=en juego , 1=perdió , 2=ganó
-        gvars.win_value_f = 0  # se guarda en memoria si se gana o pierde, y se pone en log sólo cuando hay un strobe
-        #gvars.keep_log = False  # true=logear este ciclo. Permite no logear los intersticios de
+        labyrinth_training.gvars.strobe_value = 0  # 0=Negro 1=Blanco
+        labyrinth_training.gvars.win_value = 0  # 0=en juego , 1=perdió , 2=ganó
+        labyrinth_training.gvars.win_value_f = 0  # se guarda en memoria si se gana o pierde, y se pone en log sólo cuando hay un strobe
+        #labyrinth_training.gvars.keep_log = False  # true=logear este ciclo. Permite no logear los intersticios de
         #                       tiempo en donde ya se sabe que ganó y hasta el siguiente strobe de reinicio..
-        gvars.screen = ( pygame.display.get_surface() )  # again, else tmaze will crash.
+        labyrinth_training.gvars.screen = ( pygame.display.get_surface() )  # again, else tmaze will crash.
         pygame.time.delay(500)
         
         #initially put a intertrial to the user.
-        gvars.putInterTrial = True
+        labyrinth_training.gvars.putInterTrial = True
         
         while(True):
             if (initial_frames_latency > 0):
@@ -113,33 +117,33 @@ class labyrinth_training():
             
             
             
-            gvars.wm.draw(gvars.screen) #draw everything related to maze, to the surface
-            #gvars.clock.tick(60)
-            gvars.clock.tick_busy_loop(60)
+            labyrinth_training.gvars.wm.draw(labyrinth_training.gvars.screen) #draw everything related to maze, to the surface
+            #labyrinth_training.gvars.clock.tick(60)
+            labyrinth_training.gvars.clock.tick_busy_loop(60)
             
             
-            gvars.strobe_value = 0 
+            labyrinth_training.gvars.strobe_value = 0 
             
             
             labyrinth_training.drawScoreBar();
             
-            if gvars.lab_type == "hexag":
+            if labyrinth_training.gvars.lab_type == "hexag":
                 labyrinth_training.evalHexagWin()
-            elif gvars.lab_type == "tmaze":
+            elif labyrinth_training.gvars.lab_type == "tmaze":
                 labyrinth_training.evalTmazeWin()
             
             labyrinth_training.movementSpeedCalculation()
             
-            if gvars.lab_type == "hexag":
+            if labyrinth_training.gvars.lab_type == "hexag":
                 labyrinth_training.hexagDoorAnimations()
-            elif gvars.lab_type == "tmaze":
+            elif labyrinth_training.gvars.lab_type == "tmaze":
                 labyrinth_training.tmazeWLAnimations()
             
             
             
             labyrinth_training.joystickInput()
             
-            if gvars.lab_type == "hexag":
+            if labyrinth_training.gvars.lab_type == "hexag":
                 labyrinth_training.analyzeHexagCollisions()
             
             labyrinth_training.pyEventsHandle()
@@ -164,7 +168,7 @@ class labyrinth_training():
     @staticmethod
     def init_hexag_training():
         def init_worldmap_hexag():
-            gvars.worldMap = [
+            labyrinth_training.gvars.worldMap = [
               [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
               [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
               [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
@@ -217,7 +221,7 @@ class labyrinth_training():
               [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
             ];
             
-            gvars.sprite_positions = [
+            labyrinth_training.gvars.sprite_positions = [
                         (25.07466, 50.187876, 4),  # círculo
                         (42.308263, 20.924262, 5),  # cuadrado
                         (7.947716, 20.924262, 6),  # triángulo
@@ -235,26 +239,26 @@ class labyrinth_training():
         pass
         # inicializo algunas variables...
         
-        gvars.set_log_to_file_counter(0)
-        gvars.log_to_file_matrix = []
+        labyrinth_training.gvars.set_log_to_file_counter(0)
+        labyrinth_training.gvars.log_to_file_matrix = []
         init_worldmap_hexag();
         #####################################
         # inicializo log y declaro el archivo.
         #####################################
         # subject_name = str(raw_input("Ingrese nombre de sujeto: "))
-        gvars.set_log_file(gvars.subject_name)
+        labyrinth_training.gvars.set_log_file(labyrinth_training.gvars.subject_name)
         from time import strftime, localtime
         cad_temp = strftime("%Y%m%d", localtime())
         # cad_temp = strftime("%Y%m%d %H_%M_%S", localtime())
         file_count_1 = 0
         for i in range(0, 999):
-            if os.path.isfile("logs/" + gvars.get_log_file() + " " + "%s_hexag_%d.csv" % (cad_temp, i)):
+            if os.path.isfile("logs/" + labyrinth_training.gvars.get_log_file() + " " + "%s_hexag_%d.csv" % (cad_temp, i)):
                 file_count_1 += 1
                
         print "previous files found: %d" % file_count_1  # cantidad de archivos de log que existen de mismo experimento y sujeto en el día actual.
-        cad_temp = "logs/" + gvars.get_log_file() + " " + "%s_hexag_%d.csv" % (cad_temp, file_count_1)
+        cad_temp = "logs/" + labyrinth_training.gvars.get_log_file() + " " + "%s_hexag_%d.csv" % (cad_temp, file_count_1)
         # cad_temp = str('%s log_file.txt' % datetime.datetime.isoformat('_') ) 
-        gvars.set_log_file(open(cad_temp, 'a'))
+        labyrinth_training.gvars.set_log_file(open(cad_temp, 'a'))
         labyrinth_training.log_to_file("TIME,X,Y,DIRX,DIRY,STROBE,WIN")
         #####################################
         # main thread.
@@ -266,7 +270,7 @@ class labyrinth_training():
     @staticmethod
     def init_tmaze_training():
         def init_worldmap_tmaze():
-            gvars.worldMap = [
+            labyrinth_training.gvars.worldMap = [
               [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
               [4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4],
               [4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4],
@@ -341,33 +345,33 @@ class labyrinth_training():
               [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
             ];
             
-            gvars.sprite_positions = [(25.07466, 50.187876, 4)  ];
+            labyrinth_training.gvars.sprite_positions = [(25.07466, 50.187876, 4)  ];
             pass
         
         
         pass
         # inicializo algunas variables...
         
-        gvars.set_log_to_file_counter(0)
-        gvars.log_to_file_matrix = []
+        labyrinth_training.gvars.set_log_to_file_counter(0)
+        labyrinth_training.gvars.log_to_file_matrix = []
         init_worldmap_tmaze();
         #####################################
         # inicializo log y declaro el archivo.
         #####################################
         # subject_name = str(raw_input("Ingrese nombre de sujeto: "))
-        gvars.set_log_file(gvars.subject_name)
+        labyrinth_training.gvars.set_log_file(labyrinth_training.gvars.subject_name)
         from time import strftime, localtime
         cad_temp = strftime("%Y%m%d", localtime())
         # cad_temp = strftime("%Y%m%d %H_%M_%S", localtime())
         file_count_1 = 0
         for i in range(0, 999):
-            if os.path.isfile("logs/" + gvars.get_log_file() + " " + "%s_tmaze_%d.csv" % (cad_temp, i)):
+            if os.path.isfile("logs/" + labyrinth_training.gvars.get_log_file() + " " + "%s_tmaze_%d.csv" % (cad_temp, i)):
                 file_count_1 += 1
                
         print "previous files found: %d" % file_count_1  # cantidad de archivos de log que existen de mismo experimento y sujeto en el día actual.
-        cad_temp = "logs/" + gvars.get_log_file() + " " + "%s_tmaze_%d.csv" % (cad_temp, file_count_1)
+        cad_temp = "logs/" + labyrinth_training.gvars.get_log_file() + " " + "%s_tmaze_%d.csv" % (cad_temp, file_count_1)
         # cad_temp = str('%s log_file.txt' % datetime.datetime.isoformat('_') ) 
-        gvars.set_log_file(open(cad_temp, 'a'))
+        labyrinth_training.gvars.set_log_file(open(cad_temp, 'a'))
         labyrinth_training.log_to_file("TIME,X,Y,DIRX,DIRY,STROBE,WIN")
         #####################################
         # main thread.
@@ -378,7 +382,7 @@ class labyrinth_training():
     
     @staticmethod
     def initHexagMaze():
-        gvars.set_anim_count(61)  # to reset on initialization.
+        labyrinth_training.gvars.set_anim_count(61)  # to reset on initialization.
         #################################################################
         # ## Elección de puerta que tiene recompensa.
         #################################################################
@@ -393,42 +397,42 @@ class labyrinth_training():
         rndnum = randint(0, 5)  # @UnusedVariable
         #print rndnum
         
-        gvars.set_num_puerta(rndnum)
+        labyrinth_training.gvars.set_num_puerta(rndnum)
                     
         if rndnum == 0:
                         #print "círculo a la izquierda"
-                        gvars.set_posx_to_set(10.518899) 
-                        gvars.set_posy_to_set(48.553612)
+                        labyrinth_training.gvars.set_posx_to_set(10.518899) 
+                        labyrinth_training.gvars.set_posy_to_set(48.553612)
         elif rndnum == 1:
                         #print "triángulo a la derecha"
-                        gvars.set_posx_to_set(1.831244)
-                        gvars.set_posy_to_set(26.49384)
+                        labyrinth_training.gvars.set_posx_to_set(1.831244)
+                        labyrinth_training.gvars.set_posy_to_set(26.49384)
         elif rndnum == 2:
                         #print "triángulo a la izquierda"
-                        gvars.set_posx_to_set(10.08041)
-                        gvars.set_posy_to_set(4.028711)
+                        labyrinth_training.gvars.set_posx_to_set(10.08041)
+                        labyrinth_training.gvars.set_posy_to_set(4.028711)
         elif rndnum == 3:
                         #print "cuadrado a la derecha"
-                        gvars.set_posx_to_set(40.0201579)
-                        gvars.set_posy_to_set(4.1025887)
+                        labyrinth_training.gvars.set_posx_to_set(40.0201579)
+                        labyrinth_training.gvars.set_posy_to_set(4.1025887)
         elif rndnum == 4:
                         #print "cuadrado a la izquierda"
-                        gvars.set_posx_to_set(48.131992)
-                        gvars.set_posy_to_set(26.51180)
+                        labyrinth_training.gvars.set_posx_to_set(48.131992)
+                        labyrinth_training.gvars.set_posy_to_set(26.51180)
         elif rndnum == 5:
                         #print "círculo a la derecha"
-                        gvars.set_posx_to_set(39.487556)
-                        gvars.set_posy_to_set(48.143990)
+                        labyrinth_training.gvars.set_posx_to_set(39.487556)
+                        labyrinth_training.gvars.set_posy_to_set(48.143990)
         
         # put "money" sprite:
-        for i in range(0, len(gvars.sprite_positions)):
-                        _texnum_ = gvars.sprite_positions[i].__getitem__(2)
+        for i in range(0, len(labyrinth_training.gvars.sprite_positions)):
+                        _texnum_ = labyrinth_training.gvars.sprite_positions[i].__getitem__(2)
                         if (_texnum_ == 14):
-                            gvars.sprite_positions[i] = (gvars.get_posx_to_set(), gvars.get_posy_to_set(), 14)
+                            labyrinth_training.gvars.sprite_positions[i] = (labyrinth_training.gvars.get_posx_to_set(), labyrinth_training.gvars.get_posy_to_set(), 14)
         ########################
         # worldmap for hexag.
         # ##
-        gvars.wm = worldManager.WorldManager(gvars.worldMap, gvars.sprite_positions, 25, 25.5, -1, 0, 0, 1)
+        labyrinth_training.gvars.wm = worldManager.WorldManager(labyrinth_training.gvars.worldMap, labyrinth_training.gvars.sprite_positions, 25, 25.5, -1, 0, 0, 1)
         
     
     @staticmethod
@@ -444,8 +448,8 @@ class labyrinth_training():
                 IMG_RED_FRACTAL = 17
                 IMG_GREEN_FRACTAL = 16
         labyrinth_training.randomizeTMazeLights();
-        # gvars.wm = worldManager.WorldManager(gvars.worldMap,gvars.sprite_positions, 70, 11.5, -1, 0, 0, 1)
-        gvars.wm = worldManager.WorldManager(gvars.worldMap, gvars.sprite_positions, 70, 11.5, -1, 0, 0, 1)
+        # labyrinth_training.gvars.wm = worldManager.WorldManager(labyrinth_training.gvars.worldMap,labyrinth_training.gvars.sprite_positions, 70, 11.5, -1, 0, 0, 1)
+        labyrinth_training.gvars.wm = worldManager.WorldManager(labyrinth_training.gvars.worldMap, labyrinth_training.gvars.sprite_positions, 70, 11.5, -1, 0, 0, 1)
         
     
     @staticmethod
@@ -453,62 +457,66 @@ class labyrinth_training():
         #=======================================================================
         # #Análisis áreas del juego: región donde activa luces, región de ganar / perder..
         #=======================================================================
-        if ((LEFT_RECTANGLE.contains((gvars.wm.camera.x), (gvars.wm.camera.y)) == True) and (gvars.get_experiment_ended() == False)) :
+        if ((labyrinth_training.LEFT_RECTANGLE.contains(
+        (labyrinth_training.gvars.wm.camera.x), (labyrinth_training.gvars.wm.camera.y)) == True) and (
+                                            labyrinth_training.gvars.get_experiment_ended() == False)) :
             # log_to_file("Sujeto ingresa a área IZQUIERDA.")
-            pygame.draw.rect(gvars.screen, Color('white'), WHITE_SQUARE)
-            # gvars.strobe_value = 1
+            pygame.draw.rect(labyrinth_training.gvars.screen, Color('white'), labyrinth_training.WHITE_SQUARE)
+            # labyrinth_training.gvars.strobe_value = 1
             
-            if (gvars.get_anim_count() == 0):
-                if ((gvars.get_green_right() == 1 and gvars.get_color_experiment() == 0) or (gvars.get_green_right() == 0 and gvars.get_color_experiment() == 1)):
+            if (labyrinth_training.gvars.get_anim_count() == 0):
+                if ((labyrinth_training.gvars.get_green_right() == 1 and labyrinth_training.gvars.get_color_experiment() == 0) or (labyrinth_training.gvars.get_green_right() == 0 and labyrinth_training.gvars.get_color_experiment() == 1)):
                     #sujeto gana
-                    gvars.set_user_won(True)
+                    labyrinth_training.gvars.set_user_won(True)
                     labyrinth_training.add_score()
                     # log_to_file("Fin experimento.")
-                    gvars.set_anim_count(1)
-                    gvars.win_value = 2
-                    gvars.win_value_f = 2
-                    gvars.set_init_whitebox(0)
+                    labyrinth_training.gvars.set_anim_count(1)
+                    labyrinth_training.gvars.win_value = 2
+                    labyrinth_training.gvars.win_value_f = 2
+                    labyrinth_training.gvars.set_init_whitebox(0)
                 else:
                     # log_to_file("Sujeto PIERDE.")
                     # log_to_file("Fin experimento.")
-                    gvars.win_value = 1
-                    gvars.win_value_f = 1
-                    gvars.set_user_won(False)
-                    gvars.set_anim_count(71)
-                    gvars.set_init_whitebox(0)
+                    labyrinth_training.gvars.win_value = 1
+                    labyrinth_training.gvars.win_value_f = 1
+                    labyrinth_training.gvars.set_user_won(False)
+                    labyrinth_training.gvars.set_anim_count(71)
+                    labyrinth_training.gvars.set_init_whitebox(0)
         
         
-        if ((RIGHT_RECTANGLE.contains((gvars.wm.camera.x), (gvars.wm.camera.y)) == True)  and (gvars.get_experiment_ended() == False)):
+        if ((labyrinth_training.RIGHT_RECTANGLE.contains(
+            (labyrinth_training.gvars.wm.camera.x), (labyrinth_training.gvars.wm.camera.y)) == True)  and (
+                                    labyrinth_training.gvars.get_experiment_ended() == False)):
             # log_to_file("Sujeto ingresa a área DERECHA.")
-            pygame.draw.rect(gvars.screen, Color('white'), WHITE_SQUARE)
-            # gvars.strobe_value = 1
+            pygame.draw.rect(labyrinth_training.gvars.screen, Color('white'), labyrinth_training.WHITE_SQUARE)
+            # labyrinth_training.gvars.strobe_value = 1
             
             
-            if (gvars.get_anim_count() == 0):
-                if ((gvars.get_green_right() == 1 and gvars.get_color_experiment() == 1) or (gvars.get_green_right() == 0 and gvars.get_color_experiment() == 0)):
+            if (labyrinth_training.gvars.get_anim_count() == 0):
+                if ((labyrinth_training.gvars.get_green_right() == 1 and labyrinth_training.gvars.get_color_experiment() == 1) or (labyrinth_training.gvars.get_green_right() == 0 and labyrinth_training.gvars.get_color_experiment() == 0)):
                     #sujeto gana
-                    gvars.set_user_won(True)
-                    gvars.set_anim_count(1)
+                    labyrinth_training.gvars.set_user_won(True)
+                    labyrinth_training.gvars.set_anim_count(1)
                     labyrinth_training.add_score()
-                    gvars.win_value = 2
-                    gvars.win_value_f = 2
-                    gvars.set_init_whitebox(0)
+                    labyrinth_training.gvars.win_value = 2
+                    labyrinth_training.gvars.win_value_f = 2
+                    labyrinth_training.gvars.set_init_whitebox(0)
                 else:
                     # log_to_file("Sujeto PIERDE.")
-                    gvars.win_value = 1
-                    gvars.win_value_f = 1
-                    gvars.set_user_won(False)
-                    gvars.set_anim_count(71)
-                    gvars.set_init_whitebox(0)
+                    labyrinth_training.gvars.win_value = 1
+                    labyrinth_training.gvars.win_value_f = 1
+                    labyrinth_training.gvars.set_user_won(False)
+                    labyrinth_training.gvars.set_anim_count(71)
+                    labyrinth_training.gvars.set_init_whitebox(0)
         
-        if (gvars.wm.camera.x < 36 and gvars.get_lights_on() == False):
+        if (labyrinth_training.gvars.wm.camera.x < 36 and labyrinth_training.gvars.get_lights_on() == False):
             # log_to_file("Se encienden señales de COMPARISSON") #los fractales.
-            pygame.draw.rect(gvars.screen, Color('white'), WHITE_SQUARE)
-            gvars.set_init_whitebox(0)
-            # gvars.strobe_value = 1
-            gvars.set_lights_on(True)
-            if (gvars.get_green_right() == 0 and gvars.get_color_experiment() == 1):
-                    gvars.sprite_positions = [
+            pygame.draw.rect(labyrinth_training.gvars.screen, Color('white'), labyrinth_training.WHITE_SQUARE)
+            labyrinth_training.gvars.set_init_whitebox(0)
+            # labyrinth_training.gvars.strobe_value = 1
+            labyrinth_training.gvars.set_lights_on(True)
+            if (labyrinth_training.gvars.get_green_right() == 0 and labyrinth_training.gvars.get_color_experiment() == 1):
+                    labyrinth_training.gvars.sprite_positions = [
                       # Tres luces: Sample, y las dos para comparisson
                       # (9.5, 7.3, IMG_GREEN_FRACTAL), #comparisson izquierda
                       # (9.5, 16.7, IMG_RED_FRACTAL), #comparisson derecha
@@ -516,70 +524,70 @@ class labyrinth_training():
                       (9.5, 16.1, IMG_RED_FRACTAL),  # comparisson derecha
                       # (40, 16.7, 2), #sample
                     ]
-            if (gvars.get_green_right() == 1 and gvars.get_color_experiment() == 1):
-                    gvars.sprite_positions = [
+            if (labyrinth_training.gvars.get_green_right() == 1 and labyrinth_training.gvars.get_color_experiment() == 1):
+                    labyrinth_training.gvars.sprite_positions = [
                       # Tres luces: Sample, y las dos para comparisson
                       (9.5, 7.9, IMG_RED_FRACTAL),  # comparisson izquierda
                       (9.5, 16.1, IMG_GREEN_FRACTAL),  # comparisson derecha
                       # (40, 16.7, 2), #sample
                     ]
-            if (gvars.get_green_right() == 0 and gvars.get_color_experiment() == 0):
-                    gvars.sprite_positions = [
+            if (labyrinth_training.gvars.get_green_right() == 0 and labyrinth_training.gvars.get_color_experiment() == 0):
+                    labyrinth_training.gvars.sprite_positions = [
                       # Tres luces: Sample, y las dos para comparisson
                       (9.5, 7.9, IMG_GREEN_FRACTAL),  # comparisson izquierda
                       (9.5, 16.1, IMG_RED_FRACTAL),  # comparisson derecha
                       # (40, 16.7, 3), #sample
                     ]
-            if (gvars.get_green_right() == 1 and gvars.get_color_experiment() == 0):
-                    gvars.sprite_positions = [
+            if (labyrinth_training.gvars.get_green_right() == 1 and labyrinth_training.gvars.get_color_experiment() == 0):
+                    labyrinth_training.gvars.sprite_positions = [
                       # Tres luces: Sample, y las dos para comparisson
                       (9.5, 7.9, IMG_RED_FRACTAL),  # comparisson izquierda
                       (9.5, 16.1, IMG_GREEN_FRACTAL),  # comparisson derecha
                       # (40, 16.7, 3), #sample
                     ]
-            gvars.wm = worldManager.WorldManager(gvars.worldMap, gvars.sprite_positions, gvars.wm.camera.x,
-                                                 gvars.wm.camera.y, gvars.wm.camera.dirx, gvars.wm.camera.diry, 0, 1)
+            labyrinth_training.gvars.wm = worldManager.WorldManager(labyrinth_training.gvars.worldMap, labyrinth_training.gvars.sprite_positions, labyrinth_training.gvars.wm.camera.x,
+                                                 labyrinth_training.gvars.wm.camera.y, labyrinth_training.gvars.wm.camera.dirx, labyrinth_training.gvars.wm.camera.diry, 0, 1)
             
         #=======================================================================
         # #Se enciende luz de SAMPLE
         #=======================================================================
-        if (gvars.wm.camera.x < 57 and gvars.get_light_sample() == False):
-                    gvars.set_light_sample(True)
+        if (labyrinth_training.gvars.wm.camera.x < 57 and labyrinth_training.gvars.get_light_sample() == False):
+                    labyrinth_training.gvars.set_light_sample(True)
                     # log_to_file("Se encienden señales de SAMPLE") #la luz verde/roja
-                    pygame.draw.rect(gvars.screen, Color('white'), WHITE_SQUARE)
-                    # gvars.strobe_value = 1
-                    gvars.set_init_whitebox(0)
+                    pygame.draw.rect(labyrinth_training.gvars.screen, Color('white'), labyrinth_training.WHITE_SQUARE)
+                    # labyrinth_training.gvars.strobe_value = 1
+                    labyrinth_training.gvars.set_init_whitebox(0)
                     
-                    if (gvars.get_green_right() == 0 and gvars.get_color_experiment() == 1):
-                            gvars.sprite_positions = [
+                    if (labyrinth_training.gvars.get_green_right() == 0 and labyrinth_training.gvars.get_color_experiment() == 1):
+                            labyrinth_training.gvars.sprite_positions = [
                               # Tres luces: Sample, y las dos para comparisson
                               # (9.5, 7.3, 2), #comparisson izquierda
                               # (9.5, 16.7, 3), #comparisson derecha
                               (40, 16.7, 2),  # sample
                             ]
-                    if (gvars.get_green_right() == 1 and gvars.get_color_experiment() == 1):
-                            gvars.sprite_positions = [
+                    if (labyrinth_training.gvars.get_green_right() == 1 and labyrinth_training.gvars.get_color_experiment() == 1):
+                            labyrinth_training.gvars.sprite_positions = [
                               # Tres luces: Sample, y las dos para comparisson
                               # (9.5, 7.3, 3), #comparisson izquierda
                               # (9.5, 16.7, 2), #comparisson derecha
                               (40, 16.7, 2),  # sample
                             ]
-                    if (gvars.get_green_right() == 0 and gvars.get_color_experiment() == 0):
-                            gvars.sprite_positions = [
+                    if (labyrinth_training.gvars.get_green_right() == 0 and labyrinth_training.gvars.get_color_experiment() == 0):
+                            labyrinth_training.gvars.sprite_positions = [
                               # Tres luces: Sample, y las dos para comparisson
                               # (9.5, 7.3, 2), #comparisson izquierda
                               # (9.5, 16.7, 3), #comparisson derecha
                               (40, 16.7, 3),  # sample
                             ]
-                    if (gvars.get_green_right() == 1 and gvars.get_color_experiment() == 0):
-                            gvars.sprite_positions = [
+                    if (labyrinth_training.gvars.get_green_right() == 1 and labyrinth_training.gvars.get_color_experiment() == 0):
+                            labyrinth_training.gvars.sprite_positions = [
                               # Tres luces: Sample, y las dos para comparisson
                               # (9.5, 7.3, 3), #comparisson izquierda
                               # (9.5, 16.7, 2), #comparisson derecha
                               (40, 16.7, 3),  # sample
                             ]
-                    gvars.wm = worldManager.WorldManager(gvars.worldMap, gvars.sprite_positions, gvars.wm.camera.x, gvars.wm.camera.y,
-                                                          gvars.wm.camera.dirx, gvars.wm.camera.diry, 0, 1) 
+                    labyrinth_training.gvars.wm = worldManager.WorldManager(labyrinth_training.gvars.worldMap, labyrinth_training.gvars.sprite_positions, labyrinth_training.gvars.wm.camera.x, labyrinth_training.gvars.wm.camera.y,
+                                                          labyrinth_training.gvars.wm.camera.dirx, labyrinth_training.gvars.wm.camera.diry, 0, 1) 
             
     
     @staticmethod
@@ -589,39 +597,39 @@ class labyrinth_training():
             #=======================================================================
             # retardo hasta mostrar animación de ganaste o perdiste
             
-            if (gvars.get_anim_count() > 200 and gvars.get_anim_count() < 210):
-                gvars.set_anim_count(gvars.get_anim_count() + 1)
-            if (gvars.get_anim_count() == 210):
-                gvars.set_anim_count (1)
-            if (gvars.get_anim_count() > 270 and gvars.get_anim_count() < 280):
-                gvars.set_anim_count(gvars.get_anim_count() + 1)
-            if (gvars.get_anim_count() == 280):
-                gvars.set_anim_count (71)
+            if (labyrinth_training.gvars.get_anim_count() > 200 and labyrinth_training.gvars.get_anim_count() < 210):
+                labyrinth_training.gvars.set_anim_count(labyrinth_training.gvars.get_anim_count() + 1)
+            if (labyrinth_training.gvars.get_anim_count() == 210):
+                labyrinth_training.gvars.set_anim_count (1)
+            if (labyrinth_training.gvars.get_anim_count() > 270 and labyrinth_training.gvars.get_anim_count() < 280):
+                labyrinth_training.gvars.set_anim_count(labyrinth_training.gvars.get_anim_count() + 1)
+            if (labyrinth_training.gvars.get_anim_count() == 280):
+                labyrinth_training.gvars.set_anim_count (71)
                 
             # animación durante 60 ciclos, de ganaste o perdiste
-            if (gvars.get_anim_count() > 0 and gvars.get_anim_count() < 60):
-                    vars_tmaze.blit_alpha(gvars.screen, IMG_WIN_MONEY, (gvars.width_screen / 2 - 250, 0), 255 - gvars.get_anim_count() * 4)
-                    gvars.set_anim_count(gvars.get_anim_count() + 4)
-            if (gvars.get_anim_count() > 70 and gvars.get_anim_count() < 130):
-                    vars_tmaze.blit_alpha(gvars.screen, IMG_LOSE_SADFACE, (gvars.width_screen / 2 - 250, 0), 255 - (gvars.get_anim_count() - 70) * 4)
-                    gvars.set_anim_count(gvars.get_anim_count() + 4)
-            if (gvars.get_anim_count() == 61 or gvars.get_anim_count() == 131):
-                gvars.set_anim_count (0)  # fin animación, reiniciamos experimento.
+            if (labyrinth_training.gvars.get_anim_count() > 0 and labyrinth_training.gvars.get_anim_count() < 60):
+                    vars_tmaze.blit_alpha(labyrinth_training.gvars.screen, labyrinth_training.IMG_WIN_MONEY, (labyrinth_training.gvars.width_screen / 2 - 250, 0), 255 - labyrinth_training.gvars.get_anim_count() * 4)
+                    labyrinth_training.gvars.set_anim_count(labyrinth_training.gvars.get_anim_count() + 4)
+            if (labyrinth_training.gvars.get_anim_count() > 70 and labyrinth_training.gvars.get_anim_count() < 130):
+                    vars_tmaze.blit_alpha(labyrinth_training.gvars.screen, labyrinth_training.IMG_LOSE_SADFACE, (labyrinth_training.gvars.width_screen / 2 - 250, 0), 255 - (labyrinth_training.gvars.get_anim_count() - 70) * 4)
+                    labyrinth_training.gvars.set_anim_count(labyrinth_training.gvars.get_anim_count() + 4)
+            if (labyrinth_training.gvars.get_anim_count() == 61 or labyrinth_training.gvars.get_anim_count() == 131):
+                labyrinth_training.gvars.set_anim_count (0)  # fin animación, reiniciamos experimento.
                 #############################################
                 # reincio de experimento
                 #############################################
                 # log_to_file("Reinicio de experimento.")
                 pass
                 #print "reinicio de experimento"
-                gvars.drawInterTrial = INTERTRIAL_FRAMES_DELAY;
-                gvars.set_door_anim (0)
+                labyrinth_training.gvars.drawInterTrial = labyrinth_training.INTERTRIAL_FRAMES_DELAY;
+                labyrinth_training.gvars.set_door_anim (0)
                 # Restablecer valores de puerta cerrada, no haría falta en sprite_positions
-                for i in range(0, len(gvars.sprite_positions)):
-                    _texnum_ = gvars.sprite_positions[i].__getitem__(2)
+                for i in range(0, len(labyrinth_training.gvars.sprite_positions)):
+                    _texnum_ = labyrinth_training.gvars.sprite_positions[i].__getitem__(2)
                     if (_texnum_ > 7 and  _texnum_ < 14):
-                        gvars.sprite_positions[i] = (gvars.sprite_positions[i].__getitem__(0), gvars.sprite_positions[i].__getitem__(1), 7)
+                        labyrinth_training.gvars.sprite_positions[i] = (labyrinth_training.gvars.sprite_positions[i].__getitem__(0), labyrinth_training.gvars.sprite_positions[i].__getitem__(1), 7)
                 # time.sleep(0.05)
-                gvars.wm = worldManager.WorldManager(gvars.worldMap, gvars.sprite_positions, 25, 25.5, -1, 0, 0, 1)
+                labyrinth_training.gvars.wm = worldManager.WorldManager(labyrinth_training.gvars.worldMap, labyrinth_training.gvars.sprite_positions, 25, 25.5, -1, 0, 0, 1)
                 ########################
                 # randomizar la cámara:
                 ########################
@@ -632,59 +640,59 @@ class labyrinth_training():
                 temp_rand_num = randint(0, 30)
                 flt_num = (temp_rand_num * 2 * 3.1415) / 30
                 # en flt_num tengo un ángulo aleatorio entre 0 y 2pi
-                oldDirX = gvars.wm.camera.dirx
-                gvars.wm.camera.dirx = gvars.wm.camera.dirx * math.cos(flt_num) - gvars.wm.camera.diry * math.sin(flt_num)
-                gvars.wm.camera.diry = oldDirX * math.sin(flt_num) + gvars.wm.camera.diry * math.cos(flt_num)
-                oldPlaneX = gvars.wm.camera.planex
-                gvars.wm.camera.planex = gvars.wm.camera.planex * math.cos(flt_num) - gvars.wm.camera.planey * math.sin(flt_num)
-                gvars.wm.camera.planey = oldPlaneX * math.sin(flt_num) + gvars.wm.camera.planey * math.cos(flt_num)
+                oldDirX = labyrinth_training.gvars.wm.camera.dirx
+                labyrinth_training.gvars.wm.camera.dirx = labyrinth_training.gvars.wm.camera.dirx * math.cos(flt_num) - labyrinth_training.gvars.wm.camera.diry * math.sin(flt_num)
+                labyrinth_training.gvars.wm.camera.diry = oldDirX * math.sin(flt_num) + labyrinth_training.gvars.wm.camera.diry * math.cos(flt_num)
+                oldPlaneX = labyrinth_training.gvars.wm.camera.planex
+                labyrinth_training.gvars.wm.camera.planex = labyrinth_training.gvars.wm.camera.planex * math.cos(flt_num) - labyrinth_training.gvars.wm.camera.planey * math.sin(flt_num)
+                labyrinth_training.gvars.wm.camera.planey = oldPlaneX * math.sin(flt_num) + labyrinth_training.gvars.wm.camera.planey * math.cos(flt_num)
                 # ##
                 # remuevo el ítem de ganado, para que no se vea entre las texturas de puerta:
-                for i in range(0, len(gvars.sprite_positions)):
-                        _texnum_ = gvars.sprite_positions[i].__getitem__(2)
+                for i in range(0, len(labyrinth_training.gvars.sprite_positions)):
+                        _texnum_ = labyrinth_training.gvars.sprite_positions[i].__getitem__(2)
                         if (_texnum_ == 14):
-                            gvars.sprite_positions[i] = (0.5, 0.5, 14)
+                            labyrinth_training.gvars.sprite_positions[i] = (0.5, 0.5, 14)
                 # en cada reinicio: se pone cuadrado blanco
-                gvars.set_init_whitebox(0)  # en 2 ciclos se pondrá efectivamente el cuadrado blanco.
-                gvars.win_value = 0
-                gvars.win_value_f = 0
+                labyrinth_training.gvars.set_init_whitebox(0)  # en 2 ciclos se pondrá efectivamente el cuadrado blanco.
+                labyrinth_training.gvars.win_value = 0
+                labyrinth_training.gvars.win_value_f = 0
             pass
     
     @staticmethod
     def hexagDoorAnimations():
             # evaluates door animations and set win or lose.
-            if (gvars.get_door_anim() > 0):
-                if (gvars.get_door_anim() < 10):
-                    for i in range(0, len(gvars.wm.sprite_positions)):
-                        if (gvars.wm.sprite_positions[i].__getitem__(2) == gvars.get_door_anim() + 6):
-                            gvars.wm.sprite_positions[i] = (gvars.wm.sprite_positions[i].__getitem__(0), gvars.wm.sprite_positions[i].__getitem__(1), gvars.get_door_anim() + 7)
-                if (gvars.get_door_anim() == 60):
-                    gvars.set_door_anim(6)
+            if (labyrinth_training.gvars.get_door_anim() > 0):
+                if (labyrinth_training.gvars.get_door_anim() < 10):
+                    for i in range(0, len(labyrinth_training.gvars.wm.sprite_positions)):
+                        if (labyrinth_training.gvars.wm.sprite_positions[i].__getitem__(2) == labyrinth_training.gvars.get_door_anim() + 6):
+                            labyrinth_training.gvars.wm.sprite_positions[i] = (labyrinth_training.gvars.wm.sprite_positions[i].__getitem__(0), labyrinth_training.gvars.wm.sprite_positions[i].__getitem__(1), labyrinth_training.gvars.get_door_anim() + 7)
+                if (labyrinth_training.gvars.get_door_anim() == 60):
+                    labyrinth_training.gvars.set_door_anim(6)
                     # para ver el cuadrado blanco ya:
-                    gvars.set_init_whitebox(0)
-                if (gvars.get_door_anim() == 5):
-                    gvars.set_door_anim(60)
-                if (gvars.get_door_anim() == 50):
-                    gvars.set_door_anim(5)
-                if (gvars.get_door_anim() == 4):
-                    gvars.set_door_anim(50)
-                if (gvars.get_door_anim() == 40):
-                    gvars.set_door_anim(4)
-                if (gvars.get_door_anim() == 3):
-                    gvars.set_door_anim(40)
-                if (gvars.get_door_anim() == 30):
-                    gvars.set_door_anim(3)
-                if (gvars.get_door_anim() == 2):
-                    gvars.set_door_anim(30)
-                if (gvars.get_door_anim() == 20):
-                    gvars.set_door_anim(2)
-                if (gvars.get_door_anim() == 1):
-                    gvars.set_door_anim(20)  # para enlentecer un poco la animación
+                    labyrinth_training.gvars.set_init_whitebox(0)
+                if (labyrinth_training.gvars.get_door_anim() == 5):
+                    labyrinth_training.gvars.set_door_anim(60)
+                if (labyrinth_training.gvars.get_door_anim() == 50):
+                    labyrinth_training.gvars.set_door_anim(5)
+                if (labyrinth_training.gvars.get_door_anim() == 4):
+                    labyrinth_training.gvars.set_door_anim(50)
+                if (labyrinth_training.gvars.get_door_anim() == 40):
+                    labyrinth_training.gvars.set_door_anim(4)
+                if (labyrinth_training.gvars.get_door_anim() == 3):
+                    labyrinth_training.gvars.set_door_anim(40)
+                if (labyrinth_training.gvars.get_door_anim() == 30):
+                    labyrinth_training.gvars.set_door_anim(3)
+                if (labyrinth_training.gvars.get_door_anim() == 2):
+                    labyrinth_training.gvars.set_door_anim(30)
+                if (labyrinth_training.gvars.get_door_anim() == 20):
+                    labyrinth_training.gvars.set_door_anim(2)
+                if (labyrinth_training.gvars.get_door_anim() == 1):
+                    labyrinth_training.gvars.set_door_anim(20)  # para enlentecer un poco la animación
                     # acá pongo el gráfico de ítem ganado, no se pone antes para que no se vea entre intersticios de puerta
-                    for i in range(0, len(gvars.sprite_positions)):
-                        _texnum_ = gvars.sprite_positions[i].__getitem__(2)
+                    for i in range(0, len(labyrinth_training.gvars.sprite_positions)):
+                        _texnum_ = labyrinth_training.gvars.sprite_positions[i].__getitem__(2)
                         if (_texnum_ == 14):
-                            gvars.sprite_positions[i] = (gvars.get_posx_to_set(), gvars.get_posy_to_set(), 14)
+                            labyrinth_training.gvars.sprite_positions[i] = (labyrinth_training.gvars.get_posx_to_set(), labyrinth_training.gvars.get_posy_to_set(), 14)
             
             pass
     
@@ -693,61 +701,61 @@ class labyrinth_training():
         #=======================================================================
         # # Animación de ganaste / perdiste:
         #=======================================================================
-        if (gvars.get_anim_count() > 0 and gvars.get_anim_count() < 60):
-            gvars.notPlayable = True
-            vars_tmaze.blit_alpha(gvars.screen, IMG_WIN_MONEY, (gvars.width_screen / 2 - 250, 0), 255 - gvars.get_anim_count() * 4)
-            gvars.set_anim_count(gvars.get_anim_count() + 3)
-        if (gvars.get_anim_count() > 70 and gvars.get_anim_count() < 130):
-            gvars.notPlayable = True
-            vars_tmaze.blit_alpha(gvars.screen, IMG_LOSE_SADFACE, (gvars.width_screen / 2 - 250, 0), 255 - (gvars.get_anim_count() - 70) * 4)
-            gvars.set_anim_count(gvars.get_anim_count() + 3)
-        if (gvars.get_anim_count() == 61 or gvars.get_anim_count() == 131):
-            gvars.set_anim_count(0)
-            gvars.set_experiment_ended(True)
+        if (labyrinth_training.gvars.get_anim_count() > 0 and labyrinth_training.gvars.get_anim_count() < 60):
+            labyrinth_training.gvars.notPlayable = True
+            vars_tmaze.blit_alpha(labyrinth_training.gvars.screen, labyrinth_training.IMG_WIN_MONEY, (labyrinth_training.gvars.width_screen / 2 - 250, 0), 255 - labyrinth_training.gvars.get_anim_count() * 4)
+            labyrinth_training.gvars.set_anim_count(labyrinth_training.gvars.get_anim_count() + 3)
+        if (labyrinth_training.gvars.get_anim_count() > 70 and labyrinth_training.gvars.get_anim_count() < 130):
+            labyrinth_training.gvars.notPlayable = True
+            vars_tmaze.blit_alpha(labyrinth_training.gvars.screen, labyrinth_training.IMG_LOSE_SADFACE, (labyrinth_training.gvars.width_screen / 2 - 250, 0), 255 - (labyrinth_training.gvars.get_anim_count() - 70) * 4)
+            labyrinth_training.gvars.set_anim_count(labyrinth_training.gvars.get_anim_count() + 3)
+        if (labyrinth_training.gvars.get_anim_count() == 61 or labyrinth_training.gvars.get_anim_count() == 131):
+            labyrinth_training.gvars.set_anim_count(0)
+            labyrinth_training.gvars.set_experiment_ended(True)
         
         
-        if ((gvars.get_experiment_ended() == True) and (gvars.get_anim_count() == 0)):
+        if ((labyrinth_training.gvars.get_experiment_ended() == True) and (labyrinth_training.gvars.get_anim_count() == 0)):
             # comienza animación
             # log_to_file("Reinicio de experimento.")
             labyrinth_training.randomizeTMazeLights();
-            gvars.set_delay_reboot_button(1)
-            gvars.set_init_whitebox(0)  # para que en breve ponga la luz blanca.
-            gvars.putInterTrial = True
-            gvars.set_user_won(False)
-            gvars.set_experiment_ended(False)
-            gvars.set_lights_on (False)
-            gvars.set_light_sample(False)
-            gvars.sprite_positions = []
-            gvars.win_value = 3 #para intertrial
-            gvars.win_value_f = 3 #para intertrial
-            gvars.wm = worldManager.WorldManager(gvars.worldMap, gvars.sprite_positions, 70, 11.5, -1, 0, 0, 1)
+            labyrinth_training.gvars.set_delay_reboot_button(1)
+            labyrinth_training.gvars.set_init_whitebox(0)  # para que en breve ponga la luz blanca.
+            labyrinth_training.gvars.putInterTrial = True
+            labyrinth_training.gvars.set_user_won(False)
+            labyrinth_training.gvars.set_experiment_ended(False)
+            labyrinth_training.gvars.set_lights_on (False)
+            labyrinth_training.gvars.set_light_sample(False)
+            labyrinth_training.gvars.sprite_positions = []
+            labyrinth_training.gvars.win_value = 3 #para intertrial
+            labyrinth_training.gvars.win_value_f = 3 #para intertrial
+            labyrinth_training.gvars.wm = worldManager.WorldManager(labyrinth_training.gvars.worldMap, labyrinth_training.gvars.sprite_positions, 70, 11.5, -1, 0, 0, 1)
             #time.sleep(0.1)
     
     @staticmethod
     def randomizeTMazeLights():
-        gvars.set_color_experiment (randint(0, 200))
+        labyrinth_training.gvars.set_color_experiment (randint(0, 200))
         # determino si el color que debe seguir el usuario es el rojo o verde
         # color_experiment = 1 significa VERDE
         # color_experiment = 0 significa ROJO
         # green_right = 0 significa SEÑAL VERDE EN LADO IZQUIERDO
         # green_right = 1 significa SEÑAL VERDE EN LADO DERECHO
         pass
-        #print gvars.get_color_experiment()
-        if (gvars.get_color_experiment() > 100):
-            gvars.set_color_experiment (1)  # GREEN
+        #print labyrinth_training.gvars.get_color_experiment()
+        if (labyrinth_training.gvars.get_color_experiment() > 100):
+            labyrinth_training.gvars.set_color_experiment (1)  # GREEN
             # log_to_file("Color a seguir en el laberinto: VERDE")
         else:
-            gvars.set_color_experiment (0)  # RED
+            labyrinth_training.gvars.set_color_experiment (0)  # RED
             # log_to_file("Color a seguir en el laberinto: ROJO")
         pass
         # se establece otro número aleatorio para la posición de los colores. Rojo izq, verde der, o al revés:
-        gvars.set_green_right(randint(0, 200))
-        if (gvars.get_green_right() > 100):
-            gvars.set_green_right(1)  # GREEN derecha
+        labyrinth_training.gvars.set_green_right(randint(0, 200))
+        if (labyrinth_training.gvars.get_green_right() > 100):
+            labyrinth_training.gvars.set_green_right(1)  # GREEN derecha
             # log_to_file("Posición del color verde: DERECHA")
             # log_to_file("Posición del color rojo: IZQUIERDA")
         else:
-            gvars.set_green_right(0)  # GREEN izquierda
+            labyrinth_training.gvars.set_green_right(0)  # GREEN izquierda
             # log_to_file("Posición del color verde: IZQUIERDA")
             # log_to_file("Posición del color rojo: DERECHA")
         pass
@@ -762,102 +770,102 @@ class labyrinth_training():
             DOOR_RADIUS_POW2 = 9.9225  # radio 3.15
             
             # Puerta que está en: (12.1535  , 47.025, 7),
-            if (pow(abs(gvars.wm.camera.x - 12.1535), 2) < DOOR_RADIUS_POW2 and  pow(abs(gvars.wm.camera.y - 47.025), 2) < DOOR_RADIUS_POW2):
+            if (pow(abs(labyrinth_training.gvars.wm.camera.x - 12.1535), 2) < DOOR_RADIUS_POW2 and  pow(abs(labyrinth_training.gvars.wm.camera.y - 47.025), 2) < DOOR_RADIUS_POW2):
                 colision_puerta = True
-                if (gvars.get_num_puerta() == 0):
+                if (labyrinth_training.gvars.get_num_puerta() == 0):
                     # print "ganaste"
-                    if (gvars.get_anim_count () == 0):
-                        gvars.set_anim_count (201)
-                        gvars.win_value_f = 2
+                    if (labyrinth_training.gvars.get_anim_count () == 0):
+                        labyrinth_training.gvars.set_anim_count (201)
+                        labyrinth_training.gvars.win_value_f = 2
                         labyrinth_training.add_score()
                 else:
                     # print "perdiste"
-                    if (gvars.get_anim_count () == 0):
-                        gvars.set_anim_count (271)
-                        gvars.win_value_f = 1
+                    if (labyrinth_training.gvars.get_anim_count () == 0):
+                        labyrinth_training.gvars.set_anim_count (271)
+                        labyrinth_training.gvars.win_value_f = 1
             
             
             # Puerta que está en: (3.2796 , 26.6061, 7),
-            if (pow(abs(gvars.wm.camera.x - 3.2796), 2) < DOOR_RADIUS_POW2 and  pow(abs(gvars.wm.camera.y - 26.6061), 2) < DOOR_RADIUS_POW2):
+            if (pow(abs(labyrinth_training.gvars.wm.camera.x - 3.2796), 2) < DOOR_RADIUS_POW2 and  pow(abs(labyrinth_training.gvars.wm.camera.y - 26.6061), 2) < DOOR_RADIUS_POW2):
                 colision_puerta = True
-                if (gvars.get_num_puerta() == 1):
+                if (labyrinth_training.gvars.get_num_puerta() == 1):
                     # print "ganaste"
-                    if (gvars.get_anim_count () == 0):
-                        gvars.set_anim_count (201)
-                        gvars.win_value_f = 2
+                    if (labyrinth_training.gvars.get_anim_count () == 0):
+                        labyrinth_training.gvars.set_anim_count (201)
+                        labyrinth_training.gvars.win_value_f = 2
                         labyrinth_training.add_score()
                 else:
                     # print "perdiste"
-                    if (gvars.get_anim_count () == 0):
-                        gvars.set_anim_count (271)
-                        gvars.win_value_f = 1
+                    if (labyrinth_training.gvars.get_anim_count () == 0):
+                        labyrinth_training.gvars.set_anim_count (271)
+                        labyrinth_training.gvars.win_value_f = 1
                 
             # Puerta que está en: (11.0158 , 5.1344, 7),
-            if (pow(abs(gvars.wm.camera.x - 11.0158), 2) < DOOR_RADIUS_POW2 and  pow(abs(gvars.wm.camera.y - 5.1344), 2) < DOOR_RADIUS_POW2):
+            if (pow(abs(labyrinth_training.gvars.wm.camera.x - 11.0158), 2) < DOOR_RADIUS_POW2 and  pow(abs(labyrinth_training.gvars.wm.camera.y - 5.1344), 2) < DOOR_RADIUS_POW2):
                 colision_puerta = True
-                if (gvars.get_num_puerta() == 2):
+                if (labyrinth_training.gvars.get_num_puerta() == 2):
                     # print "ganaste"
-                    if (gvars.get_anim_count () == 0):
-                        gvars.set_anim_count (201)
-                        gvars.win_value_f = 2
+                    if (labyrinth_training.gvars.get_anim_count () == 0):
+                        labyrinth_training.gvars.set_anim_count (201)
+                        labyrinth_training.gvars.win_value_f = 2
                         labyrinth_training.add_score()
                 else:
                     # print "perdiste"
-                    if (gvars.get_anim_count () == 0):
-                        gvars.set_anim_count (271)
-                        gvars.win_value_f = 1
+                    if (labyrinth_training.gvars.get_anim_count () == 0):
+                        labyrinth_training.gvars.set_anim_count (271)
+                        labyrinth_training.gvars.win_value_f = 1
             
             # Puerta que está en: (38.9078 , 4.8715, 7),
-            if (pow(abs(gvars.wm.camera.x - 38.9078), 2) < DOOR_RADIUS_POW2 and  pow(abs(gvars.wm.camera.y - 4.8715), 2) < DOOR_RADIUS_POW2):
+            if (pow(abs(labyrinth_training.gvars.wm.camera.x - 38.9078), 2) < DOOR_RADIUS_POW2 and  pow(abs(labyrinth_training.gvars.wm.camera.y - 4.8715), 2) < DOOR_RADIUS_POW2):
                 colision_puerta = True
-                if (gvars.get_num_puerta() == 3):
+                if (labyrinth_training.gvars.get_num_puerta() == 3):
                     # print "ganaste"
-                    if (gvars.get_anim_count () == 0):
-                        gvars.set_anim_count (201)
-                        gvars.win_value_f = 2
+                    if (labyrinth_training.gvars.get_anim_count () == 0):
+                        labyrinth_training.gvars.set_anim_count (201)
+                        labyrinth_training.gvars.win_value_f = 2
                         labyrinth_training.add_score()
                 else:
                     # print "perdiste"
-                    if (gvars.get_anim_count () == 0):
-                        gvars.set_anim_count (271)
-                        gvars.win_value_f = 1
+                    if (labyrinth_training.gvars.get_anim_count () == 0):
+                        labyrinth_training.gvars.set_anim_count (271)
+                        labyrinth_training.gvars.win_value_f = 1
                 
             # Puerta que está en: (47.41795 , 26.33015, 7),
-            if (pow(abs(gvars.wm.camera.x - 47.41795) , 2) < DOOR_RADIUS_POW2 and  pow(abs(gvars.wm.camera.y - 26.33015) , 2) < DOOR_RADIUS_POW2):
+            if (pow(abs(labyrinth_training.gvars.wm.camera.x - 47.41795) , 2) < DOOR_RADIUS_POW2 and  pow(abs(labyrinth_training.gvars.wm.camera.y - 26.33015) , 2) < DOOR_RADIUS_POW2):
                 colision_puerta = True
-                if (gvars.get_num_puerta() == 4):
+                if (labyrinth_training.gvars.get_num_puerta() == 4):
                     # print "ganaste"
-                    if (gvars.get_anim_count () == 0):
-                        gvars.set_anim_count (201)
-                        gvars.win_value_f = 2
+                    if (labyrinth_training.gvars.get_anim_count () == 0):
+                        labyrinth_training.gvars.set_anim_count (201)
+                        labyrinth_training.gvars.win_value_f = 2
                         labyrinth_training.add_score()
                 else:
                     # print "perdiste"
-                    if (gvars.get_anim_count () == 0):
-                        gvars.set_anim_count (271)
-                        gvars.win_value_f = 1
+                    if (labyrinth_training.gvars.get_anim_count () == 0):
+                        labyrinth_training.gvars.set_anim_count (271)
+                        labyrinth_training.gvars.win_value_f = 1
             
             # Puerta que está en: (37.95235 , 46.89345, 7)
-            if (pow(abs(gvars.wm.camera.x - 37.95235) , 2) < DOOR_RADIUS_POW2 and  pow(abs(gvars.wm.camera.y - 46.89345), 2) < DOOR_RADIUS_POW2):
+            if (pow(abs(labyrinth_training.gvars.wm.camera.x - 37.95235) , 2) < DOOR_RADIUS_POW2 and  pow(abs(labyrinth_training.gvars.wm.camera.y - 46.89345), 2) < DOOR_RADIUS_POW2):
                 colision_puerta = True
-                if (gvars.get_num_puerta() == 5):
+                if (labyrinth_training.gvars.get_num_puerta() == 5):
                     # print "ganaste"
-                    if (gvars.get_anim_count () == 0):
-                        gvars.set_anim_count (201)
-                        gvars.win_value_f = 2
+                    if (labyrinth_training.gvars.get_anim_count () == 0):
+                        labyrinth_training.gvars.set_anim_count (201)
+                        labyrinth_training.gvars.win_value_f = 2
                         labyrinth_training.add_score()
                 else:
                     # print "perdiste"
-                    if (gvars.get_anim_count () == 0):
-                        gvars.set_anim_count (271)
-                        gvars.win_value_f = 1
+                    if (labyrinth_training.gvars.get_anim_count () == 0):
+                        labyrinth_training.gvars.set_anim_count (271)
+                        labyrinth_training.gvars.win_value_f = 1
                     
                 
             
             if (colision_puerta):
                 # print "colsión"
-                if (gvars.get_door_anim () == 0):
-                        gvars.set_door_anim (1)
+                if (labyrinth_training.gvars.get_door_anim () == 0):
+                        labyrinth_training.gvars.set_door_anim (1)
             pass
     
     @staticmethod
@@ -865,91 +873,91 @@ class labyrinth_training():
         ##########################
         # Cuadrado blanco: se evalúa si dibujarlo o dibujar un cuadrado negro.
         ##########################
-        pygame.draw.rect(gvars.screen, Color('black'), WHITE_SQUARE)
-        if (gvars.get_init_whitebox() < 8):
-            if (gvars.get_init_whitebox() == 0):
-                gvars.hasStarted = True
-                pygame.draw.rect(gvars.screen, Color('white'), WHITE_SQUARE)
-                gvars.strobe_value = 1
-                pygame.display.update(WHITE_SQUARE)
+        pygame.draw.rect(labyrinth_training.gvars.screen, Color('black'), labyrinth_training.WHITE_SQUARE)
+        if (labyrinth_training.gvars.get_init_whitebox() < 8):
+            if (labyrinth_training.gvars.get_init_whitebox() == 0):
+                labyrinth_training.gvars.hasStarted = True
+                pygame.draw.rect(labyrinth_training.gvars.screen, Color('white'), labyrinth_training.WHITE_SQUARE)
+                labyrinth_training.gvars.strobe_value = 1
+                pygame.display.update(labyrinth_training.WHITE_SQUARE)
                 pygame.time.delay(50)
-                gvars.strobe_value = 1
+                labyrinth_training.gvars.strobe_value = 1
                 labyrinth_training.onlyLog();
                 pygame.time.delay(50)
-                pygame.draw.rect(gvars.screen, Color('black'), WHITE_SQUARE)
-                pygame.display.update(WHITE_SQUARE)
-                gvars.win_value = gvars.win_value_f
-                gvars.strobe_value = 0
-            gvars.set_init_whitebox(gvars.get_init_whitebox() + 1)
+                pygame.draw.rect(labyrinth_training.gvars.screen, Color('black'), labyrinth_training.WHITE_SQUARE)
+                pygame.display.update(labyrinth_training.WHITE_SQUARE)
+                labyrinth_training.gvars.win_value = labyrinth_training.gvars.win_value_f
+                labyrinth_training.gvars.strobe_value = 0
+            labyrinth_training.gvars.set_init_whitebox(labyrinth_training.gvars.get_init_whitebox() + 1)
         pass
     
     @staticmethod
     def keyboardInput():
-            if (gvars.strobe_value == 1):
+            if (labyrinth_training.gvars.strobe_value == 1):
                 return;
-            if (gvars.drawInterTrial > 0):
+            if (labyrinth_training.gvars.drawInterTrial > 0):
                 return;
-            if (gvars.notPlayable):
+            if (labyrinth_training.gvars.notPlayable):
                 return;
             #=======================================================================
             # # Entradas de Teclado.
             #=======================================================================
-            if (gvars.get_delay_reboot_button() > 0):
-                gvars.set_delay_reboot_button(gvars.get_delay_reboot_button() + 1)
+            if (labyrinth_training.gvars.get_delay_reboot_button() > 0):
+                labyrinth_training.gvars.set_delay_reboot_button(labyrinth_training.gvars.get_delay_reboot_button() + 1)
                 
-            if (gvars.get_delay_reboot_button() == 12):
-                gvars.set_delay_reboot_button(0)
-            if (gvars.get_door_anim() == 0 ):
+            if (labyrinth_training.gvars.get_delay_reboot_button() == 12):
+                labyrinth_training.gvars.set_delay_reboot_button(0)
+            if (labyrinth_training.gvars.get_door_anim() == 0 ):
                 keys = pygame.key.get_pressed()
                 if keys[K_SPACE]:
                     # Forzar Reinicio: como si hubiera ganado o perdido.
-                    if (gvars.get_delay_reboot_button() == 0):
-                        gvars.set_delay_reboot_button(1)
-                        gvars.set_anim_count (61)
+                    if (labyrinth_training.gvars.get_delay_reboot_button() == 0):
+                        labyrinth_training.gvars.set_delay_reboot_button(1)
+                        labyrinth_training.gvars.set_anim_count (61)
                 ###############
                 # Desplazarse con UP DOWN LEFT RIGHT
                 if keys[K_UP]:
                     # move forward if no wall in front of you
                     try:
-                        moveX = gvars.wm.camera.x + gvars.wm.camera.dirx * gvars.moveSpeed
-                        if(gvars.worldMap[int(moveX)][int(gvars.wm.camera.y)] == 0 and gvars.worldMap[int(moveX + 0.1)][int(gvars.wm.camera.y)] == 0):gvars.wm.camera.x += gvars.wm.camera.dirx * gvars.moveSpeed
-                        moveY = gvars.wm.camera.y + gvars.wm.camera.diry * gvars.moveSpeed
-                        if(gvars.worldMap[int(gvars.wm.camera.x)][int(moveY)] == 0 and gvars.worldMap[int(gvars.wm.camera.x)][int(moveY + 0.1)] == 0):gvars.wm.camera.y += gvars.wm.camera.diry * gvars.moveSpeed
+                        moveX = labyrinth_training.gvars.wm.camera.x + labyrinth_training.gvars.wm.camera.dirx * labyrinth_training.gvars.moveSpeed
+                        if(labyrinth_training.gvars.worldMap[int(moveX)][int(labyrinth_training.gvars.wm.camera.y)] == 0 and labyrinth_training.gvars.worldMap[int(moveX + 0.1)][int(labyrinth_training.gvars.wm.camera.y)] == 0):labyrinth_training.gvars.wm.camera.x += labyrinth_training.gvars.wm.camera.dirx * labyrinth_training.gvars.moveSpeed
+                        moveY = labyrinth_training.gvars.wm.camera.y + labyrinth_training.gvars.wm.camera.diry * labyrinth_training.gvars.moveSpeed
+                        if(labyrinth_training.gvars.worldMap[int(labyrinth_training.gvars.wm.camera.x)][int(moveY)] == 0 and labyrinth_training.gvars.worldMap[int(labyrinth_training.gvars.wm.camera.x)][int(moveY + 0.1)] == 0):labyrinth_training.gvars.wm.camera.y += labyrinth_training.gvars.wm.camera.diry * labyrinth_training.gvars.moveSpeed
                     except:
                         pass
                 if keys[K_DOWN]:
                     # move backwards if no wall behind you
                     try:
-                        if(gvars.worldMap[int(gvars.wm.camera.x - gvars.wm.camera.dirx * gvars.moveSpeed)][int(gvars.wm.camera.y)] == 0):gvars.wm.camera.x -= gvars.wm.camera.dirx * gvars.moveSpeed
-                        if(gvars.worldMap[int(gvars.wm.camera.x)][int(gvars.wm.camera.y - gvars.wm.camera.diry * gvars.moveSpeed)] == 0):gvars.wm.camera.y -= gvars.wm.camera.diry * gvars.moveSpeed
+                        if(labyrinth_training.gvars.worldMap[int(labyrinth_training.gvars.wm.camera.x - labyrinth_training.gvars.wm.camera.dirx * labyrinth_training.gvars.moveSpeed)][int(labyrinth_training.gvars.wm.camera.y)] == 0):labyrinth_training.gvars.wm.camera.x -= labyrinth_training.gvars.wm.camera.dirx * labyrinth_training.gvars.moveSpeed
+                        if(labyrinth_training.gvars.worldMap[int(labyrinth_training.gvars.wm.camera.x)][int(labyrinth_training.gvars.wm.camera.y - labyrinth_training.gvars.wm.camera.diry * labyrinth_training.gvars.moveSpeed)] == 0):labyrinth_training.gvars.wm.camera.y -= labyrinth_training.gvars.wm.camera.diry * labyrinth_training.gvars.moveSpeed
                     except:
                         pass
                 if (keys[K_RIGHT] and not keys[K_DOWN]) or (keys[K_LEFT] and keys[K_DOWN]):
                     # rotate to the right
                     # both camera direction and camera plane must be rotated
-                    oldDirX = gvars.wm.camera.dirx
-                    gvars.wm.camera.dirx = gvars.wm.camera.dirx * math.cos(-gvars.rotSpeed) - gvars.wm.camera.diry * math.sin(-gvars.rotSpeed)
-                    gvars.wm.camera.diry = oldDirX * math.sin(-gvars.rotSpeed) + gvars.wm.camera.diry * math.cos(-gvars.rotSpeed)
-                    oldPlaneX = gvars.wm.camera.planex
-                    gvars.wm.camera.planex = gvars.wm.camera.planex * math.cos(-gvars.rotSpeed) - gvars.wm.camera.planey * math.sin(-gvars.rotSpeed)
-                    gvars.wm.camera.planey = oldPlaneX * math.sin(-gvars.rotSpeed) + gvars.wm.camera.planey * math.cos(-gvars.rotSpeed)
+                    oldDirX = labyrinth_training.gvars.wm.camera.dirx
+                    labyrinth_training.gvars.wm.camera.dirx = labyrinth_training.gvars.wm.camera.dirx * math.cos(-labyrinth_training.gvars.rotSpeed) - labyrinth_training.gvars.wm.camera.diry * math.sin(-labyrinth_training.gvars.rotSpeed)
+                    labyrinth_training.gvars.wm.camera.diry = oldDirX * math.sin(-labyrinth_training.gvars.rotSpeed) + labyrinth_training.gvars.wm.camera.diry * math.cos(-labyrinth_training.gvars.rotSpeed)
+                    oldPlaneX = labyrinth_training.gvars.wm.camera.planex
+                    labyrinth_training.gvars.wm.camera.planex = labyrinth_training.gvars.wm.camera.planex * math.cos(-labyrinth_training.gvars.rotSpeed) - labyrinth_training.gvars.wm.camera.planey * math.sin(-labyrinth_training.gvars.rotSpeed)
+                    labyrinth_training.gvars.wm.camera.planey = oldPlaneX * math.sin(-labyrinth_training.gvars.rotSpeed) + labyrinth_training.gvars.wm.camera.planey * math.cos(-labyrinth_training.gvars.rotSpeed)
                 if (keys[K_LEFT] and not keys[K_DOWN]) or (keys[K_RIGHT] and keys[K_DOWN]): 
                     # rotate to the left
                     # both camera direction and camera plane must be rotated
-                    oldDirX = gvars.wm.camera.dirx
-                    gvars.wm.camera.dirx = gvars.wm.camera.dirx * math.cos(gvars.rotSpeed) - gvars.wm.camera.diry * math.sin(gvars.rotSpeed)
-                    gvars.wm.camera.diry = oldDirX * math.sin(gvars.rotSpeed) + gvars.wm.camera.diry * math.cos(gvars.rotSpeed)
-                    oldPlaneX = gvars.wm.camera.planex
-                    gvars.wm.camera.planex = gvars.wm.camera.planex * math.cos(gvars.rotSpeed) - gvars.wm.camera.planey * math.sin(gvars.rotSpeed)
-                    gvars.wm.camera.planey = oldPlaneX * math.sin(gvars.rotSpeed) + gvars.wm.camera.planey * math.cos(gvars.rotSpeed)
+                    oldDirX = labyrinth_training.gvars.wm.camera.dirx
+                    labyrinth_training.gvars.wm.camera.dirx = labyrinth_training.gvars.wm.camera.dirx * math.cos(labyrinth_training.gvars.rotSpeed) - labyrinth_training.gvars.wm.camera.diry * math.sin(labyrinth_training.gvars.rotSpeed)
+                    labyrinth_training.gvars.wm.camera.diry = oldDirX * math.sin(labyrinth_training.gvars.rotSpeed) + labyrinth_training.gvars.wm.camera.diry * math.cos(labyrinth_training.gvars.rotSpeed)
+                    oldPlaneX = labyrinth_training.gvars.wm.camera.planex
+                    labyrinth_training.gvars.wm.camera.planex = labyrinth_training.gvars.wm.camera.planex * math.cos(labyrinth_training.gvars.rotSpeed) - labyrinth_training.gvars.wm.camera.planey * math.sin(labyrinth_training.gvars.rotSpeed)
+                    labyrinth_training.gvars.wm.camera.planey = oldPlaneX * math.sin(labyrinth_training.gvars.rotSpeed) + labyrinth_training.gvars.wm.camera.planey * math.cos(labyrinth_training.gvars.rotSpeed)
                 
             
     
     @staticmethod
     def joystickInput():
-            if (gvars.drawInterTrial > 0):
+            if (labyrinth_training.gvars.drawInterTrial > 0):
                 return;
-            if (gvars.strobe_value == 1):
+            if (labyrinth_training.gvars.strobe_value == 1):
                 return;
             ############################################
             # Toma de datos de Joystick
@@ -959,9 +967,9 @@ class labyrinth_training():
             
             x = 0
             y = 0
-            if (gvars.joystick_working == True and gvars.get_door_anim() == 0):
-                x = gvars.my_joystick.get_axis(0)
-                y = gvars.my_joystick.get_axis(1)
+            if (labyrinth_training.gvars.joystick_working == True and labyrinth_training.gvars.get_door_anim() == 0):
+                x = labyrinth_training.gvars.my_joystick.get_axis(0)
+                y = labyrinth_training.gvars.my_joystick.get_axis(1)
             x_ax1 = int(x)
             x_ax2 = int(x + 0.1)
             x_ax = 0
@@ -976,43 +984,49 @@ class labyrinth_training():
                 y_ax = -1
             if y_ax2 == 1:
                 y_ax = 1
-            vectorInstantaneo.x = int(2.2 * x_ax)
-            vectorInstantaneo.y = int(2.2 * y_ax)
+            labyrinth_training.vectorInstantaneo.x = int(2.2 * x_ax)
+            labyrinth_training.vectorInstantaneo.y = int(2.2 * y_ax)
+            labyrinth_training.forceInstantVectorAnalysis()
+    
+    @staticmethod
+    def forceInstantVectorAnalysis():
             #=======================================================================
             # #Analizo vector Instantáneo (datos tomados de joystick)
             #=======================================================================
-            if vectorInstantaneo.x < 0:
+            if labyrinth_training.vectorInstantaneo.x < 0:
                 # for each rotation unit divided by 30 (maximum vector module allowed)
                 # rotate to the left
                 # both camera direction and camera plane must be rotated
-                oldDirX = gvars.wm.camera.dirx
-                gvars.wm.camera.dirx = gvars.wm.camera.dirx * math.cos(gvars.rotSpeed) - gvars.wm.camera.diry * math.sin(gvars.rotSpeed)
-                gvars.wm.camera.diry = oldDirX * math.sin(gvars.rotSpeed) + gvars.wm.camera.diry * math.cos(gvars.rotSpeed)
-                oldPlaneX = gvars.wm.camera.planex
-                gvars.wm.camera.planex = gvars.wm.camera.planex * math.cos(gvars.rotSpeed) - gvars.wm.camera.planey * math.sin(gvars.rotSpeed)
-                gvars.wm.camera.planey = oldPlaneX * math.sin(gvars.rotSpeed) + gvars.wm.camera.planey * math.cos(gvars.rotSpeed)
-            if vectorInstantaneo.y < 0:
+                oldDirX = labyrinth_training.gvars.wm.camera.dirx
+                labyrinth_training.gvars.wm.camera.dirx = labyrinth_training.gvars.wm.camera.dirx * math.cos(labyrinth_training.gvars.rotSpeed) - labyrinth_training.gvars.wm.camera.diry * math.sin(labyrinth_training.gvars.rotSpeed)
+                labyrinth_training.gvars.wm.camera.diry = oldDirX * math.sin(labyrinth_training.gvars.rotSpeed) + labyrinth_training.gvars.wm.camera.diry * math.cos(labyrinth_training.gvars.rotSpeed)
+                oldPlaneX = labyrinth_training.gvars.wm.camera.planex
+                labyrinth_training.gvars.wm.camera.planex = labyrinth_training.gvars.wm.camera.planex * math.cos(labyrinth_training.gvars.rotSpeed) - labyrinth_training.gvars.wm.camera.planey * math.sin(labyrinth_training.gvars.rotSpeed)
+                labyrinth_training.gvars.wm.camera.planey = oldPlaneX * math.sin(labyrinth_training.gvars.rotSpeed) + labyrinth_training.gvars.wm.camera.planey * math.cos(labyrinth_training.gvars.rotSpeed)
+            if labyrinth_training.vectorInstantaneo.y < 0:
                 # print "movió arriba"
-                moveX = gvars.wm.camera.x + gvars.wm.camera.dirx * gvars.moveSpeed
-                if(gvars.worldMap[int(moveX)][int(gvars.wm.camera.y)] == 0 and gvars.worldMap[int(moveX + 0.1)][int(gvars.wm.camera.y)] == 0):gvars.wm.camera.x += gvars.wm.camera.dirx * gvars.moveSpeed
-                moveY = gvars.wm.camera.y + gvars.wm.camera.diry * gvars.moveSpeed
-                if(gvars.worldMap[int(gvars.wm.camera.x)][int(moveY)] == 0 and gvars.worldMap[int(gvars.wm.camera.x)][int(moveY + 0.1)] == 0):gvars.wm.camera.y += gvars.wm.camera.diry * gvars.moveSpeed
-            if vectorInstantaneo.x > 0:
+                moveX = labyrinth_training.gvars.wm.camera.x + labyrinth_training.gvars.wm.camera.dirx * labyrinth_training.gvars.moveSpeed
+                if(labyrinth_training.gvars.worldMap[int(moveX)][int(labyrinth_training.gvars.wm.camera.y)] == 0 and labyrinth_training.gvars.worldMap[int(moveX + 0.1)][int(labyrinth_training.gvars.wm.camera.y)] == 0):labyrinth_training.gvars.wm.camera.x += labyrinth_training.gvars.wm.camera.dirx * labyrinth_training.gvars.moveSpeed
+                moveY = labyrinth_training.gvars.wm.camera.y + labyrinth_training.gvars.wm.camera.diry * labyrinth_training.gvars.moveSpeed
+                if(labyrinth_training.gvars.worldMap[int(labyrinth_training.gvars.wm.camera.x)][int(moveY)] == 0 and labyrinth_training.gvars.worldMap[int(labyrinth_training.gvars.wm.camera.x)][int(moveY + 0.1)] == 0):labyrinth_training.gvars.wm.camera.y += labyrinth_training.gvars.wm.camera.diry * labyrinth_training.gvars.moveSpeed
+            if labyrinth_training.vectorInstantaneo.x > 0:
                 # print "movió derecha"
                 # rotate to the right
                 # both camera direction and camera plane must be rotated
-                oldDirX = gvars.wm.camera.dirx
-                gvars.wm.camera.dirx = gvars.wm.camera.dirx * math.cos(-gvars.rotSpeed) - gvars.wm.camera.diry * math.sin(-gvars.rotSpeed)
-                gvars.wm.camera.diry = oldDirX * math.sin(-gvars.rotSpeed) + gvars.wm.camera.diry * math.cos(-gvars.rotSpeed)
-                oldPlaneX = gvars.wm.camera.planex
-                gvars.wm.camera.planex = gvars.wm.camera.planex * math.cos(-gvars.rotSpeed) - gvars.wm.camera.planey * math.sin(-gvars.rotSpeed)
-                gvars.wm.camera.planey = oldPlaneX * math.sin(-gvars.rotSpeed) + gvars.wm.camera.planey * math.cos(-gvars.rotSpeed)
-            if vectorInstantaneo.y > 0:
+                oldDirX = labyrinth_training.gvars.wm.camera.dirx
+                labyrinth_training.gvars.wm.camera.dirx = labyrinth_training.gvars.wm.camera.dirx * math.cos(-labyrinth_training.gvars.rotSpeed) - labyrinth_training.gvars.wm.camera.diry * math.sin(-labyrinth_training.gvars.rotSpeed)
+                labyrinth_training.gvars.wm.camera.diry = oldDirX * math.sin(-labyrinth_training.gvars.rotSpeed) + labyrinth_training.gvars.wm.camera.diry * math.cos(-labyrinth_training.gvars.rotSpeed)
+                oldPlaneX = labyrinth_training.gvars.wm.camera.planex
+                labyrinth_training.gvars.wm.camera.planex = labyrinth_training.gvars.wm.camera.planex * math.cos(-labyrinth_training.gvars.rotSpeed) - labyrinth_training.gvars.wm.camera.planey * math.sin(-labyrinth_training.gvars.rotSpeed)
+                labyrinth_training.gvars.wm.camera.planey = oldPlaneX * math.sin(-labyrinth_training.gvars.rotSpeed) + labyrinth_training.gvars.wm.camera.planey * math.cos(-labyrinth_training.gvars.rotSpeed)
+            if labyrinth_training.vectorInstantaneo.y > 0:
                 # print "movió abajo"
                 # move backwards if no wall behind you
-                if(gvars.worldMap[int(gvars.wm.camera.x - gvars.wm.camera.dirx * gvars.moveSpeed)][int(gvars.wm.camera.y)] == 0):gvars.wm.camera.x -= gvars.wm.camera.dirx * gvars.moveSpeed
-                if(gvars.worldMap[int(gvars.wm.camera.x)][int(gvars.wm.camera.y - gvars.wm.camera.diry * gvars.moveSpeed)] == 0):gvars.wm.camera.y -= gvars.wm.camera.diry * gvars.moveSpeed
-            
+                if(labyrinth_training.gvars.worldMap[int(labyrinth_training.gvars.wm.camera.x - labyrinth_training.gvars.wm.camera.dirx * labyrinth_training.gvars.moveSpeed)][int(labyrinth_training.gvars.wm.camera.y)] == 0):labyrinth_training.gvars.wm.camera.x -= labyrinth_training.gvars.wm.camera.dirx * labyrinth_training.gvars.moveSpeed
+                if(labyrinth_training.gvars.worldMap[int(labyrinth_training.gvars.wm.camera.x)][int(labyrinth_training.gvars.wm.camera.y - labyrinth_training.gvars.wm.camera.diry * labyrinth_training.gvars.moveSpeed)] == 0):labyrinth_training.gvars.wm.camera.y -= labyrinth_training.gvars.wm.camera.diry * labyrinth_training.gvars.moveSpeed
+            #reset instant vector to 0
+            labyrinth_training.vectorInstantaneo.x = 0
+            labyrinth_training.vectorInstantaneo.y = 0
     
     @staticmethod
     def pyEventsHandle():
@@ -1040,58 +1054,58 @@ class labyrinth_training():
     @staticmethod
     def movementSpeedCalculation():
             # timing for input and FPS counter
-            frameTime = float(gvars.clock.get_time()) / 1000.0  # frameTime is the time this frame has taken, in seconds
+            frameTime = float(labyrinth_training.gvars.clock.get_time()) / 1000.0  # frameTime is the time this frame has taken, in seconds
             # text = f.render(str(clock.get_fps()), False, (255, 255, 0))
             # screen.blit(text, text.get_rect(), text.get_rect())
             ###############################################
             # speed modifiers (desplazamiento, rotación)
             ###############################################
-            #gvars.moveSpeed = frameTime * 10.2  # the constant value is in squares / second
-            #gvars.rotSpeed = frameTime * 1.5  # the constant value is in radians / second
-            gvars.moveSpeed = frameTime * 6.63  # the constant value is in squares / second
-            gvars.rotSpeed = frameTime * 0.975  # the constant value is in radians / second
+            #labyrinth_training.gvars.moveSpeed = frameTime * 10.2  # the constant value is in squares / second
+            #labyrinth_training.gvars.rotSpeed = frameTime * 1.5  # the constant value is in radians / second
+            labyrinth_training.gvars.moveSpeed = frameTime * 6.63  # the constant value is in squares / second
+            labyrinth_training.gvars.rotSpeed = frameTime * 0.975  # the constant value is in radians / second
     
     @staticmethod
     def initJoystick():
         # Initialize the joysticks
-        gvars.joystick_working = False
+        labyrinth_training.gvars.joystick_working = False
         try:
             pygame.joystick.init()
-            gvars.my_joystick = pygame.joystick.Joystick(0)
-            gvars.my_joystick.init()
-            gvars.joystick_working = True
+            labyrinth_training.gvars.my_joystick = pygame.joystick.Joystick(0)
+            labyrinth_training.gvars.my_joystick.init()
+            labyrinth_training.gvars.joystick_working = True
         except:
             # log_to_file("Joystick incompatible o no encontrado.")
-            gvars.joystick_working = False
+            labyrinth_training.gvars.joystick_working = False
         time.sleep(0.5)
     
     @staticmethod
     def initPygame():
         pygame.mixer.init()
         pygame.init()
-        if gvars.lab_type == "hexag":
+        if labyrinth_training.gvars.lab_type == "hexag":
             st = "Hexágono";
         else:
             st = "T-Maze"
-        pygame.display.set_caption("Laberinto Virtual - %s v%s" % (st , str(PROGRAM_VERSION)))
+        pygame.display.set_caption("Laberinto Virtual - %s v%s" % (st , str(labyrinth_training.PROGRAM_VERSION)))
         
         # size = w, h = 1600,900
-        gvars.size = gvars.width_screen, gvars.height_screen = 1366, 768
-        #gvars.size = gvars.width_screen, gvars.height_screen = 640, 480
+        labyrinth_training.gvars.size = labyrinth_training.gvars.width_screen, labyrinth_training.gvars.height_screen = 1366, 768
+        #labyrinth_training.gvars.size = labyrinth_training.gvars.width_screen, labyrinth_training.gvars.height_screen = 640, 480
         
         global ALL_WINDOW
         ALL_WINDOW = Rect(0, 0, 1366, 768)
         #ALL_WINDOW = Rect(0, 0, 640, 480)
         
         # window = pygame.display.set_mode(size)
-        gvars.mainWindow = pygame.display.set_mode(gvars.size, pygame.FULLSCREEN)
-        # pygame.display.set_mode(gvars.size, pygame.RESIZABLE)
+        labyrinth_training.gvars.mainWindow = pygame.display.set_mode(labyrinth_training.gvars.size, pygame.FULLSCREEN)
+        # pygame.display.set_mode(labyrinth_training.gvars.size, pygame.RESIZABLE)
         
         
-        gvars.screen = pygame.display.get_surface()
+        labyrinth_training.gvars.screen = pygame.display.get_surface()
         # pixScreen = pygame.surfarray.pixels2d(screen)
         pygame.mouse.set_visible(False)
-        gvars.clock = pygame.time.Clock()
+        labyrinth_training.gvars.clock = pygame.time.Clock()
         time.sleep(0.5)
     
     @staticmethod
@@ -1099,38 +1113,38 @@ class labyrinth_training():
         #=======================================================================
         # ##dibujo barra de puntaje
         #=======================================================================
-        pygame.draw.rect(gvars.screen, (0, 0, 235), (50 - 5, gvars.height_screen / 2 - 5 - gvars.get_player_score(), 15 + 10, gvars.get_player_score() + 1 + 8), 0)
-        pygame.draw.rect(gvars.screen, (0, 0, 255), (50, gvars.height_screen / 2 - gvars.get_player_score(), 15, gvars.get_player_score() + 1), 0)
+        pygame.draw.rect(labyrinth_training.gvars.screen, (0, 0, 235), (50 - 5, labyrinth_training.gvars.height_screen / 2 - 5 - labyrinth_training.gvars.get_player_score(), 15 + 10, labyrinth_training.gvars.get_player_score() + 1 + 8), 0)
+        pygame.draw.rect(labyrinth_training.gvars.screen, (0, 0, 255), (50, labyrinth_training.gvars.height_screen / 2 - labyrinth_training.gvars.get_player_score(), 15, labyrinth_training.gvars.get_player_score() + 1), 0)
         pass
     
     @staticmethod
     def drawInterTrial():
-        if (gvars.putInterTrial == True):
-                gvars.drawInterTrial = INTERTRIAL_FRAMES_DELAY;
-                gvars.putInterTrial = False;
-                gvars.notPlayable = False
+        if (labyrinth_training.gvars.putInterTrial == True):
+                labyrinth_training.gvars.drawInterTrial = labyrinth_training.INTERTRIAL_FRAMES_DELAY;
+                labyrinth_training.gvars.putInterTrial = False;
+                labyrinth_training.gvars.notPlayable = False
         pass
-        if (gvars.drawInterTrial == INTERTRIAL_FRAMES_DELAY):
+        if (labyrinth_training.gvars.drawInterTrial == labyrinth_training.INTERTRIAL_FRAMES_DELAY):
             # print "strobe start"
-            gvars.set_init_whitebox(0)
-        if (gvars.drawInterTrial == 1):
+            labyrinth_training.gvars.set_init_whitebox(0)
+        if (labyrinth_training.gvars.drawInterTrial == 1):
             # print "strobe end"
-            gvars.set_init_whitebox(0)
-            gvars.win_value = 0 #set to trial start
-            gvars.win_value_f = 0 #set to trial start
-            gvars.drawInterTrial = 0
-            gvars.trialStarting = 1
-            if (gvars.trainingStarting == 1 and gvars.lab_type == "hexag"):
-                gvars.trainingStarting_f = 1
-                gvars.trainingStarting = 0;
-        if (gvars.drawInterTrial > 0):
-            # pygame.draw.rect(gvars.screen, pygame.color.Color., Rect, width=0)
-            # print "drawing intertrial: %d" %gvars.drawInterTrial
-            pygame.draw.rect(gvars.screen, Color('black'), ALL_WINDOW)
-            # pygame.draw.circle(gvars.screen, Color('white'), (gvars.width_screen / 2, gvars.height_screen/2), 10, width=10)
-            pygame.draw.circle(gvars.screen, Color('white'), (gvars.width_screen / 2, gvars.height_screen / 2), 10, 0)
-            # pygame.draw.rect(gvars.screen, Color('black'), ALL_WINDOW)
-            gvars.drawInterTrial -= 1 
+            labyrinth_training.gvars.set_init_whitebox(0)
+            labyrinth_training.gvars.win_value = 0 #set to trial start
+            labyrinth_training.gvars.win_value_f = 0 #set to trial start
+            labyrinth_training.gvars.drawInterTrial = 0
+            labyrinth_training.gvars.trialStarting = 1
+            if (labyrinth_training.gvars.trainingStarting == 1 and labyrinth_training.gvars.lab_type == "hexag"):
+                labyrinth_training.gvars.trainingStarting_f = 1
+                labyrinth_training.gvars.trainingStarting = 0;
+        if (labyrinth_training.gvars.drawInterTrial > 0):
+            # pygame.draw.rect(labyrinth_training.gvars.screen, pygame.color.Color., Rect, width=0)
+            # print "drawing intertrial: %d" %labyrinth_training.gvars.drawInterTrial
+            pygame.draw.rect(labyrinth_training.gvars.screen, Color('black'), ALL_WINDOW)
+            # pygame.draw.circle(labyrinth_training.gvars.screen, Color('white'), (labyrinth_training.gvars.width_screen / 2, labyrinth_training.gvars.height_screen/2), 10, width=10)
+            pygame.draw.circle(labyrinth_training.gvars.screen, Color('white'), (labyrinth_training.gvars.width_screen / 2, labyrinth_training.gvars.height_screen / 2), 10, 0)
+            # pygame.draw.rect(labyrinth_training.gvars.screen, Color('black'), ALL_WINDOW)
+            labyrinth_training.gvars.drawInterTrial -= 1 
             
         pass
     
@@ -1140,80 +1154,80 @@ class labyrinth_training():
             # ## Log to file:
             #=======================================================================
             # will only log during trial, after door opening and before trial starts again, no logging..
-            if (gvars.hasStarted == False):
+            if (labyrinth_training.gvars.hasStarted == False):
                 return;
-            if (gvars.drawInterTrial > 0 and gvars.strobe_value == 0):
+            if (labyrinth_training.gvars.drawInterTrial > 0 and labyrinth_training.gvars.strobe_value == 0):
                 #intertrial, so put win_value 3
-                gvars.win_value = 3
+                labyrinth_training.gvars.win_value = 3
             labyrinth_training.onlyLog();
-            # print (gvars.wm.camera.x), gvars.wm.camera.y
-#             if (gvars.strobe_value == 1 and gvars.win_value == 0):
+            # print (labyrinth_training.gvars.wm.camera.x), labyrinth_training.gvars.wm.camera.y
+#             if (labyrinth_training.gvars.strobe_value == 1 and labyrinth_training.gvars.win_value == 0):
 #                 # empezar a logear
-#                 gvars.keep_log = True
-#             elif (gvars.strobe_value == 1 and gvars.win_value > 0):
-#                 gvars.keep_log = False
+#                 labyrinth_training.gvars.keep_log = True
+#             elif (labyrinth_training.gvars.strobe_value == 1 and labyrinth_training.gvars.win_value > 0):
+#                 labyrinth_training.gvars.keep_log = False
             pass
     
     @staticmethod
     def onlyLog():
-        if (gvars.trialStarting == 1 and gvars.lab_type == "tmaze"):
+        if (labyrinth_training.gvars.trialStarting == 1 and labyrinth_training.gvars.lab_type == "tmaze"):
                     #trial is just starting, in tmaze case, put type of trial in the strobe field.
-                    gvars.strobe_value = 9;
-                    if (gvars.get_color_experiment() == 1 and gvars.get_green_right() == 1):
+                    labyrinth_training.gvars.strobe_value = 9;
+                    if (labyrinth_training.gvars.get_color_experiment() == 1 and labyrinth_training.gvars.get_green_right() == 1):
                         #color verde, verde aparece a la derecha
-                        gvars.strobe_value = 2;
+                        labyrinth_training.gvars.strobe_value = 2;
                         #print "color verde, verde aparece a la derecha"
                         pass
-                    if (gvars.get_color_experiment() == 1 and gvars.get_green_right() == 0):
+                    if (labyrinth_training.gvars.get_color_experiment() == 1 and labyrinth_training.gvars.get_green_right() == 0):
                         #color verde, verde aparece a la izquierda
-                        gvars.strobe_value = 3;
+                        labyrinth_training.gvars.strobe_value = 3;
                         #print "color verde, verde aparece a la izquierda"
                         pass
-                    if (gvars.get_color_experiment() == 0 and gvars.get_green_right() == 0):
+                    if (labyrinth_training.gvars.get_color_experiment() == 0 and labyrinth_training.gvars.get_green_right() == 0):
                         #color rojo, rojo aparece a la derecha
-                        gvars.strobe_value = 4;
+                        labyrinth_training.gvars.strobe_value = 4;
                         #print "#color rojo, rojo aparece a la derecha"
                         pass
-                    if (gvars.get_color_experiment() == 0 and gvars.get_green_right() == 1):
+                    if (labyrinth_training.gvars.get_color_experiment() == 0 and labyrinth_training.gvars.get_green_right() == 1):
                         #color rojo, rojo aparece a la izquierda
-                        gvars.strobe_value = 5;
+                        labyrinth_training.gvars.strobe_value = 5;
                         #print "#color rojo, rojo aparece a la izquierda"
                         pass
                     
-                    gvars.trialStarting = 0;
-        if (gvars.trainingStarting_f == 1 and gvars.trainingStarting == 0):
-                gvars.trainingStarting_f = 0
-                gvars.strobe_value = gvars.get_num_puerta() + 2;
-                print "first strobe with num: %d"%gvars.strobe_value
+                    labyrinth_training.gvars.trialStarting = 0;
+        if (labyrinth_training.gvars.trainingStarting_f == 1 and labyrinth_training.gvars.trainingStarting == 0):
+                labyrinth_training.gvars.trainingStarting_f = 0
+                labyrinth_training.gvars.strobe_value = labyrinth_training.gvars.get_num_puerta() + 2;
+                print "first strobe with num: %d"%labyrinth_training.gvars.strobe_value
                 pass
         milis = (pygame.time.get_ticks())
-        labyrinth_training.log_to_file("%d,%f,%f,%f,%f,%d,%d" % (milis, gvars.wm.camera.x, gvars.wm.camera.y, gvars.wm.camera.dirx,
-                                                       gvars.wm.camera.diry, gvars.strobe_value, gvars.win_value))
+        labyrinth_training.log_to_file("%d,%f,%f,%f,%f,%d,%d" % (milis, labyrinth_training.gvars.wm.camera.x, labyrinth_training.gvars.wm.camera.y, labyrinth_training.gvars.wm.camera.dirx,
+                                                       labyrinth_training.gvars.wm.camera.diry, labyrinth_training.gvars.strobe_value, labyrinth_training.gvars.win_value))
     
     @staticmethod
     def add_score():
         # log_to_file("Sujeto GANA.")
-        gvars.set_player_score(gvars.get_player_score() + 10)
+        labyrinth_training.gvars.set_player_score(labyrinth_training.gvars.get_player_score() + 10)
     
     @staticmethod
     def log_to_file(string_to_log=""):
-        # if (gvars.get_log_to_file_counter() < 30):
-            gvars.log_to_file_matrix.append(string_to_log + '\n')
-            gvars.set_log_to_file_counter(gvars.get_log_to_file_counter() + 1)
+        # if (labyrinth_training.gvars.get_log_to_file_counter() < 30):
+            labyrinth_training.gvars.log_to_file_matrix.append(string_to_log + '\n')
+            labyrinth_training.gvars.set_log_to_file_counter(labyrinth_training.gvars.get_log_to_file_counter() + 1)
     #     else:
-    #         gvars.log_to_file_matrix.append(string_to_log+'\n')
-    #         gvars.set_log_to_file_counter(gvars.get_log_to_file_counter()+1)
-    #         for i in range(0,gvars.get_log_to_file_counter()):
-    #             gvars.get_log_file().write(gvars.log_to_file_matrix[i]) # python will convert \n to os.linesep
-    #         gvars.set_log_to_file_counter(0)
-    #         gvars.log_to_file_matrix=[]
+    #         labyrinth_training.gvars.log_to_file_matrix.append(string_to_log+'\n')
+    #         labyrinth_training.gvars.set_log_to_file_counter(labyrinth_training.gvars.get_log_to_file_counter()+1)
+    #         for i in range(0,labyrinth_training.gvars.get_log_to_file_counter()):
+    #             labyrinth_training.gvars.get_log_file().write(labyrinth_training.gvars.log_to_file_matrix[i]) # python will convert \n to os.linesep
+    #         labyrinth_training.gvars.set_log_to_file_counter(0)
+    #         labyrinth_training.gvars.log_to_file_matrix=[]
             pass
     
     @staticmethod
     def finalize_log():
-        for i in range(0, gvars.get_log_to_file_counter()):
-            gvars.get_log_file().write(gvars.log_to_file_matrix[i])  # python will convert \n to os.linesep
-        gvars.get_log_file().close()
+        for i in range(0, labyrinth_training.gvars.get_log_to_file_counter()):
+            labyrinth_training.gvars.get_log_file().write(labyrinth_training.gvars.log_to_file_matrix[i])  # python will convert \n to os.linesep
+        labyrinth_training.gvars.get_log_file().close()
         print "Archivo de log cerrado."
     
     @staticmethod
@@ -1236,3 +1250,9 @@ class labyrinth_training():
 
 if __name__ == '__main__':
     a = labyrinth_training()
+#     time.sleep(10)
+#     while(True):
+#         time.sleep(2)
+#         a.vectorInstantaneo.y = 1
+#         a.forceInstantVectorAnalysis()
+        
