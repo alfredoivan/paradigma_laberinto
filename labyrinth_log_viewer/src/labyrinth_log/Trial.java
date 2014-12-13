@@ -8,11 +8,29 @@ public class Trial {
     
     ArrayList<PointTime> points = new ArrayList<PointTime>();
     
-    int status = 0; //0 undefined , 1 lose, 2 win
+    int status = 0; //0 undefined , 1 lose , 2 win
     int start = 0;
     int duration = 0;
     int end = 0;
+    int colorType = 0; // 0 undefined , 1 green , 2 red
+    int rewardPosition = 0; //0 undefined , 1 reward right , 2 reward left
     
+    public int getRewardPosition() {
+        return rewardPosition;
+    }
+
+    public void setRewardPosition(int rewardPosition) {
+        this.rewardPosition = rewardPosition;
+    }
+
+    public int getColorType() {
+        return colorType;
+    }
+
+    public void setColorType(int colorType) {
+        this.colorType = colorType;
+    }
+
     public Trial(){
         //System.out.println("New Trial created.");
         status = 0;

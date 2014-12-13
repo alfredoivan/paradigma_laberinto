@@ -45,6 +45,7 @@ public class FrameMain extends JFrame implements ChangeListener {
     int currentTrialStart = 0;
     int currentTrialEnd = 0;
     int currentTrialStatus = 0; // 0 unknown, 1 lose, 2 win
+    int currentTrialType = -1; //0 hexag , 1 tmaze
 
     boolean fileOpened = false; // true = at least one file has been opened
     boolean winingLocationFound = false; //appropriate with octagon.
@@ -341,6 +342,7 @@ public class FrameMain extends JFrame implements ChangeListener {
             this.setSize(850, 300);
             this.setVisible(true);
         }
+        currentTrialType = type;
     }
     
     public void openFile(String path) throws FileNotFoundException, IOException {
@@ -354,6 +356,8 @@ public class FrameMain extends JFrame implements ChangeListener {
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
             Trial temp = new Trial();
+            boolean afterInterTrial = false; //temporal variable to keep track of the inmediate line after intertrial
+            boolean startRecording = false; //if true, this line is being recorded.
             while (line != null) {
                 sb.append(line);
                 sb.append(System.lineSeparator());
@@ -361,34 +365,78 @@ public class FrameMain extends JFrame implements ChangeListener {
                 if (line == null)
                     continue;
                 line = line.replaceAll(";", ","); // just in case it is with ;
-                if (line.contains(",1,1") || line.contains(",1,2")) {
-                    if (line.contains(",1,1")) {
-                        temp.setStatus(1);
-                    } else {
-                        temp.setStatus(2);
-                        // we inform position of win. Useful if hexag to
-                        // determine winning status in each trial and to put
-                        // winning loc.
-
-                        canvas.winningPoint.setLocation(temp.getPoint(-1)
-                                .iGetX(), temp.getPoint(-1).iGetY());
-                        // System.out.println(".........----");
-                        // System.out.println(temp.getPoint(-1).iGetX());
-                        // System.out.println(temp.getPoint(-1).iGetY());
-                        // System.out.println(".........----");
-                        winingLocationFound = true;
-
-                    }
-                    // currentTrialStart = temp.getStart();
-                    // currentTrialEnd = temp.getEnd();
-                    // currentTrialStatus = temp.getStatus();
-
-                    trialArray.add(temp);
-                    temp = new Trial();
-                    continue;
+                if (line.contains(",1,3") || line.contains(",0,3")  || line.contains(",0,2") || line.contains(",0,1")       ) {
+                        //omit these lines as they are intertrial..
+                        afterInterTrial = true;
+                        startRecording = false;
                 }
-                temp.addPoint(line);
+                else{
 
+                    if (startRecording == true){
+                        if (line.contains(",1,1") || line.contains(",1,2")) {
+                            if (line.contains(",1,1")) {
+                                temp.setStatus(1);
+                            } else {
+                                temp.setStatus(2);
+                                // we inform position of win. Useful if hexag to
+                                // determine winning status in each trial and to put
+                                // winning loc.
+
+                                canvas.winningPoint.setLocation(temp.getPoint(-1)
+                                        .iGetX(), temp.getPoint(-1).iGetY());
+                                // System.out.println(".........----");
+                                // System.out.println(temp.getPoint(-1).iGetX());
+                                // System.out.println(temp.getPoint(-1).iGetY());
+                                // System.out.println(".........----");
+                                winingLocationFound = true;
+
+                            }
+                            // currentTrialStart = temp.getStart();
+                            // currentTrialEnd = temp.getEnd();
+                            // currentTrialStatus = temp.getStatus();
+
+                            trialArray.add(temp);
+                            temp = new Trial();
+                            continue;
+                      }
+                      temp.addPoint(line);
+                  }
+                    
+                    
+                  if (afterInterTrial == true){
+                      //this line goes exactly after the intertrial, contains useful info about trial type.
+                      afterInterTrial = false;
+                      startRecording = true;
+                      //System.out.println("----------------------------------------");
+                      //System.out.println("This trial corresponds to: ");
+                      //System.out.println(line);
+                      if ( line.contains(",2,0") ){
+                          //System.out.println("VERDE ; REWARD DERECHA");
+                          temp.setColorType(1);
+                          temp.setRewardPosition(1);
+                      }
+                      else if ( line.contains(",3,0") ){
+                          //System.out.println("VERDE ; REWARD IZQUIERDA");
+                          temp.setColorType(1);
+                          temp.setRewardPosition(2);
+                      }
+                      else if ( line.contains(",4,0") ){
+                          //System.out.println("ROJO  ; REWARD DERECHA");
+                          temp.setColorType(2);
+                          temp.setRewardPosition(1);
+                      }
+                      else if ( line.contains(",5,0") ){
+                          //System.out.println("ROJO  ; REWARD IZQUIERDA");
+                          temp.setColorType(2);
+                          temp.setRewardPosition(2);
+                      }
+                      else{
+                          //System.out.println("Error: no hay mensaje de tipo de trial.");
+                      }
+                      //System.out.println("----------------------------------------");
+                  }
+
+              }
             }
             trialArray.add(temp);
             // String everything = sb.toString();
@@ -499,6 +547,10 @@ public class FrameMain extends JFrame implements ChangeListener {
     public void setSliderPointTime(int tmpin) {
         //System.out.println(trialArray.get(currentTrialIndex).getPoint(tmpin)
         //        .toString());
+        if (trialArray.get(currentTrialIndex).getStatus() == 0){
+            return;
+        }
+        
         print(trialArray.get(currentTrialIndex).getPoint(tmpin).toString());
         canvas.updateData(
                 (int) trialArray.get(currentTrialIndex).getPoint(tmpin).getX(),
@@ -507,6 +559,12 @@ public class FrameMain extends JFrame implements ChangeListener {
                         .getTime(),
                 trialArray.get(currentTrialIndex).getPoint(tmpin).getDirX(),
                 trialArray.get(currentTrialIndex).getPoint(tmpin).getDirY());
+        //next sample color and reward position (tmaze only)
+        if (currentTrialType == 1){
+             canvas.setColorType(trialArray.get(currentTrialIndex).getColorType());
+             canvas.setRewardPosition(trialArray.get(currentTrialIndex).getRewardPosition());
+        }
+
     }
 
     @SuppressWarnings("static-access")
